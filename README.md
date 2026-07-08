@@ -16,6 +16,71 @@ Booking aktiválásakor a rendszer kikényszeríti az Auth + Legal függőségek
 
 Nincs szükség npm buildre, Composerre, Elementorra vagy külső CDN-re. A gyökérben található `composer.json` kizárólag opcionális fejlesztői WPCS-ellenőrzéshez kell; a WordPress futtatásához nem.
 
+
+## GitHub repo, helyi gyökérmappa és kattintós indítás
+
+Ezt a repo gyökeret kell megnyitni VS Code-ban, és ez az a mappa, amelynek a `README.md` fájlja GitHubon is látszik:
+
+```text
+C:\Users\Vizi\Desktop\Projects\agency-site-factory
+```
+
+A kattintós weboldalgyártó felület indítása Windows alatt:
+
+```text
+C:\Users\Vizi\Desktop\Projects\agency-site-factory\start-factory-manager.bat
+```
+
+Duplakatt után a launcher megkeresi a PHP-t, elindítja a Factory Managert, majd automatikusan megnyitja:
+
+```text
+http://127.0.0.1:8765
+```
+
+A Factory Manager forrása ebben a repo-ban található:
+
+```text
+tools/factory-manager/
+tools/lib/site-factory.php
+```
+
+A felület innen, gombokkal kezeli az ügyfélsite gyártást:
+
+- új projekt létrehozása wizardból;
+- LocalWP/DDEV WordPress `public` célmappa megadása;
+- blueprint választás;
+- modulok kiválasztása, például Booking, Auth, Legal, Analytics, Newsletter;
+- dry-run futtatása;
+- install/update futtatása;
+- modulok telepítése/frissítése;
+- műveleti napló és hibák megjelenítése.
+
+A Factory Manager és a CLI scriptek mindig ezt a repo gyökeret használják hivatalos framework source rootként:
+
+```text
+agency-site-factory/
+```
+
+Innen másolják a cél WordPress site-ba a fő csomagokat:
+
+```text
+wp-content/plugins/agency-core
+wp-content/themes/agency-theme
+wp-content/plugins/agency-module-*
+```
+
+Példa másolási irány LocalWP célsite esetén:
+
+```text
+C:\Users\Vizi\Desktop\Projects\agency-site-factory\wp-content\plugins\agency-core
+  → C:\Users\Vizi\Local Sites\agency-test\app\public\wp-content\plugins\agency-core
+
+C:\Users\Vizi\Desktop\Projects\agency-site-factory\wp-content\themes\agency-theme
+  → C:\Users\Vizi\Local Sites\agency-test\app\public\wp-content\themes\agency-theme
+```
+
+Fontos: a Factory Manager nem régi `outputs/...` vagy gépspecifikus Codex munkamappából dolgozik, hanem ebből a GitHub-ready repo gyökérből.
+
 ## Mit tartalmaz?
 
 - Agency Theme klasszikus PHP template hierarchy-val és reszponzív design token rendszerrel.
