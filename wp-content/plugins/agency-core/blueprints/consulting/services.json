@@ -1,0 +1,23 @@
+[
+  {
+    "title": "Üzleti stratégia",
+    "slug": "uzleti-strategia",
+    "excerpt": "Fókuszált célok és végrehajtható növekedési terv.",
+    "content": "A jelenlegi helyzetből kiindulva kijelöljük a prioritásokat, a mérőszámokat és a megvalósítás ütemét.",
+    "price": "150000",
+    "price_currency": "HUF"
+  },
+  {
+    "title": "Működésfejlesztés",
+    "slug": "mukodesfejlesztes",
+    "excerpt": "Átláthatóbb folyamatok és kevesebb szervezeti súrlódás.",
+    "content": "Feltérképezzük a kritikus folyamatokat, majd egyszerűsítjük a felelősségeket és az információáramlást."
+  },
+  {
+    "title": "Digitális transzformáció",
+    "slug": "digitalis-transzformacio",
+    "excerpt": "Technológiai döntések üzleti eredményekhez kötve.",
+    "content": "Segítünk a megfelelő eszközök, automatizálási lehetőségek és bevezetési sorrend kiválasztásában."
+  }
+]
+

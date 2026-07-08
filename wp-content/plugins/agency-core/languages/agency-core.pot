@@ -1,0 +1,63 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Agency Core 1.6.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-30 00:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: agency-core\n"
+
+msgid "Agency Kit Settings"
+msgstr ""
+
+msgid "Import Blueprint"
+msgstr ""
+
+msgid "Blueprint imported successfully."
+msgstr ""
+
+msgid "Agency sections"
+msgstr ""
+
+msgid "Add section"
+msgstr ""
+
+msgid "Remove"
+msgstr ""
+
+msgid "Move up"
+msgstr ""
+
+msgid "Move down"
+msgstr ""
+
+msgid "Component"
+msgstr ""
+
+msgid "Brand name"
+msgstr ""
+
+msgid "Primary color"
+msgstr ""
+
+msgid "Secondary color"
+msgstr ""
+
+msgid "Background color"
+msgstr ""
+
+msgid "Opening hours (schema.org format)"
+msgstr ""
+
+msgid "Schema output"
+msgstr ""
+
+msgid "Service details"
+msgstr ""
+
+msgid "Price"
+msgstr ""
+
+msgid "Currency"
+msgstr ""

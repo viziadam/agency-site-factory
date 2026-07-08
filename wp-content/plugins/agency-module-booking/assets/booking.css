@@ -1,0 +1,149 @@
+.agency-booking-form,
+.agency-booking-account {
+	--booking-ink: var(--agency-color-text, #171713);
+	--booking-gold: var(--agency-color-primary, #b78b00);
+	--booking-soft: color-mix(in srgb, var(--agency-color-background, #fff) 90%, var(--agency-color-secondary, #eee));
+	--booking-line: color-mix(in srgb, var(--booking-ink) 15%, transparent);
+	box-sizing: border-box;
+	max-width: 1180px;
+	margin: clamp(2rem, 6vw, 5rem) auto;
+	color: var(--booking-ink);
+	font-family: var(--agency-font-body, inherit);
+}
+.agency-booking-form * { box-sizing: border-box; }
+.agency-booking-wizard { overflow: hidden; border: 1px solid var(--booking-line); border-radius: 6px; background: var(--agency-color-background, #fff); box-shadow: 0 22px 55px rgba(20, 20, 16, .1); }
+.agency-booking-steps { display: grid; grid-template-columns: repeat(4, 1fr); background: #181815; }
+.agency-booking-steps button { display: flex; min-height: 70px; gap: .75rem; align-items: center; justify-content: center; padding: 1rem; border: 0; border-right: 1px solid rgba(255,255,255,.08); background: transparent; color: #9ca3af; font: inherit; font-size: .82rem; font-weight: 850; letter-spacing: .07em; text-transform: uppercase; }
+.agency-booking-steps button span { display: grid; width: 28px; height: 28px; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-size: .78rem; }
+.agency-booking-steps button.is-active { color: #e1b719; }
+.agency-booking-steps button.is-complete { color: #cce3df; cursor: pointer; }
+.agency-booking-wizard-body { display: grid; grid-template-columns: minmax(0, 3fr) minmax(270px, 1.18fr); min-height: 650px; }
+.agency-booking-stage { padding: clamp(2rem, 5vw, 4.5rem); }
+.agency-booking-panel { display: none; animation: booking-in .25s ease; }
+.agency-booking-panel.is-active { display: block; }
+@keyframes booking-in { from { opacity: 0; transform: translateY(8px); } }
+.agency-booking-eyebrow,
+.agency-booking-summary > span { color: var(--booking-gold); font-size: .76rem; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.agency-booking-panel h2,
+.agency-booking-summary h2 { margin: .55rem 0 .65rem; font-family: var(--agency-font-heading, Georgia, serif); font-size: clamp(2rem, 4vw, 2.75rem); font-weight: 500; line-height: 1.1; }
+.agency-booking-panel > p { margin: 0 0 1.8rem; color: color-mix(in srgb, var(--booking-ink) 72%, transparent); }
+.agency-booking-services { display: grid; gap: .55rem; }
+.agency-booking-service { display: grid; grid-template-columns: 1fr auto; width: 100%; gap: 1rem; align-items: center; padding: 1.1rem 1rem; border: 1px solid var(--booking-line); border-radius: 4px; background: transparent; color: inherit; text-align: left; cursor: pointer; transition: .18s ease; }
+.agency-booking-service:hover,
+.agency-booking-service.is-selected { border-color: var(--booking-gold); background: color-mix(in srgb, var(--booking-gold) 6%, transparent); transform: translateY(-1px); }
+.agency-booking-service span:first-child { display: grid; gap: .3rem; }
+.agency-booking-service strong { font-size: .98rem; }
+.agency-booking-service small { color: color-mix(in srgb, var(--booking-ink) 70%, transparent); }
+.agency-booking-service-meta { display: grid; min-width: 115px; gap: .3rem; padding-left: 1rem; border-left: 1px solid var(--booking-line); text-align: right; }
+.agency-booking-service-meta strong { color: var(--booking-gold); }
+.agency-booking-summary { padding: clamp(2rem, 4vw, 3.4rem) 2.1rem; border-left: 1px solid var(--booking-line); background: var(--booking-soft); }
+.agency-booking-summary h2 { margin-bottom: 1.8rem; font-size: 1.8rem; }
+.agency-booking-summary > div { display: grid; gap: .55rem; padding: 1rem 0; border-bottom: 1px solid var(--booking-line); }
+.agency-booking-summary small { font-size: .73rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.agency-booking-summary strong { line-height: 1.35; }
+.agency-booking-summary > p { margin-top: 1.6rem; color: color-mix(in srgb, var(--booking-ink) 65%, transparent); font-size: .82rem; line-height: 1.6; }
+.agency-booking-calendar { overflow: hidden; margin: 1.8rem 0; border: 1px solid var(--booking-line); border-radius: 4px; }
+.agency-booking-calendar header { display: grid; grid-template-columns: 54px 1fr 54px; align-items: center; padding: .8rem; background: var(--booking-soft); text-align: center; }
+.agency-booking-calendar header button { height: 40px; border: 1px solid var(--booking-line); border-radius: 3px; background: var(--agency-color-background, #fff); cursor: pointer; font-size: 1.3rem; }
+.agency-booking-calendar-weekdays,
+.agency-booking-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+.agency-booking-calendar-weekdays span { padding: .7rem .2rem; border-top: 1px solid var(--booking-line); text-align: center; font-size: .73rem; font-weight: 850; }
+.agency-booking-calendar-grid > button,
+.agency-booking-calendar-empty { min-height: 72px; padding: .75rem; border: 0; border-top: 1px solid var(--booking-line); border-right: 1px solid var(--booking-line); background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.agency-booking-calendar-grid > button:nth-child(7n) { border-right: 0; }
+.agency-booking-calendar-grid > button strong,
+.agency-booking-calendar-grid > button small { display: block; }
+.agency-booking-calendar-grid > button small { margin-top: .25rem; color: var(--booking-gold); font-size: .65rem; }
+.agency-booking-calendar-grid > button:hover,
+.agency-booking-calendar-grid > button.is-selected { background: color-mix(in srgb, var(--booking-gold) 10%, transparent); }
+.agency-booking-calendar-grid > button:disabled { color: #b5b0a8; cursor: not-allowed; }
+.agency-booking-calendar-grid > button:disabled small { color: #aaa59e; }
+.agency-booking-loading,
+.agency-booking-error { grid-column: 1 / -1; padding: 2rem; text-align: center; }
+.agency-booking-slot-legend span::before { display: inline-block; width: 10px; height: 10px; margin-right: .5rem; border-radius: 50%; background: var(--booking-gold); content: ""; }
+.agency-booking-slot-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .65rem; margin: 1.8rem 0; }
+.agency-booking-slot { min-height: 54px; border: 1px solid var(--booking-gold); border-radius: 4px; background: transparent; color: inherit; cursor: pointer; font: inherit; }
+.agency-booking-slot:hover,
+.agency-booking-slot.is-selected { background: var(--booking-gold); color: #fff; }
+.agency-booking-back,
+.agency-booking-submit { padding: .85rem 1.35rem; border: 1px solid var(--booking-line); border-radius: 4px; background: transparent; color: inherit; cursor: pointer; font: inherit; font-weight: 750; }
+.agency-booking-submit { border-color: var(--booking-gold); background: var(--booking-gold); color: #fff; }
+.agency-booking-final-actions { display: flex; justify-content: space-between; gap: 1rem; margin-top: 1rem; }
+.agency-booking-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+.agency-booking-field { display: grid; gap: .4rem; font-weight: 700; }
+.agency-booking-field--wide { grid-column: 1 / -1; }
+.agency-booking-field input,
+.agency-booking-field textarea { width: 100%; padding: .85rem 1rem; border: 1px solid var(--booking-line); border-radius: 4px; background: #fff; color: inherit; font: inherit; }
+.agency-booking-field input:focus,
+.agency-booking-field textarea:focus { outline: 3px solid color-mix(in srgb, var(--booking-gold) 20%, transparent); border-color: var(--booking-gold); }
+.agency-booking-consent { display: flex; gap: .65rem; margin: 1.2rem 0; align-items: flex-start; }
+.agency-booking-notice { max-width: 1180px; margin: 1rem auto; padding: 1rem 1.25rem; border-radius: 6px; background: var(--booking-soft, #f4f2ed); }
+.agency-booking-notice--success { border-left: 4px solid #16803b; }
+.agency-booking-notice--error { border-left: 4px solid #b42318; }
+.agency-booking-account { padding: clamp(1.5rem, 4vw, 3rem); border: 1px solid var(--booking-line); border-radius: 10px; background: #fff; }
+.agency-booking-account-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; }
+.agency-booking-card { padding: 1.2rem; border: 1px solid var(--booking-line); border-radius: 8px; }
+.agency-booking-status { display: inline-flex; padding: .3rem .65rem; border-radius: 999px; background: #e5e7eb; font-size: .75rem; font-weight: 850; }
+.agency-booking-status--approved,.agency-booking-status--completed { background: #dcfce7; color: #166534; }
+.agency-booking-status--pending { background: #fef3c7; color: #92400e; }
+.agency-booking-status--rejected,.agency-booking-status--cancelled { background: #fee2e2; color: #991b1b; }
+@media (max-width: 800px) {
+	.agency-booking-steps button { min-height: 58px; padding: .6rem; font-size: 0; }
+	.agency-booking-steps button span { font-size: .75rem; }
+	.agency-booking-wizard-body { grid-template-columns: 1fr; }
+	.agency-booking-summary { border-top: 1px solid var(--booking-line); border-left: 0; }
+	.agency-booking-stage { padding: 1.5rem; }
+	.agency-booking-slot-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 520px) {
+	.agency-booking-grid { grid-template-columns: 1fr; }
+	.agency-booking-field--wide { grid-column: auto; }
+	.agency-booking-calendar-grid > button,.agency-booking-calendar-empty { min-height: 57px; padding: .45rem; }
+	.agency-booking-calendar-grid > button small { font-size: .55rem; }
+}
+.agency-manager-login,.agency-manager-gate { box-sizing: border-box; max-width: 520px; margin: clamp(3rem,8vw,7rem) auto; padding: clamp(2rem,5vw,3.5rem); border: 1px solid #e5e1d8; border-radius: 16px; background: #fff; box-shadow: 0 28px 70px rgba(20,20,16,.12); color: #171713; }
+.agency-manager-login-brand span,.agency-manager-topbar span { color: var(--agency-color-primary,#a67c00); font-size: .75rem; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.agency-manager-login h1 { margin: .5rem 0; font-family: var(--agency-font-heading,Georgia,serif); font-size: 2.5rem; }
+.agency-manager-login form,.agency-manager-settings { display: grid; gap: 1rem; margin-top: 2rem; }
+.agency-manager-login label:not(.agency-manager-check),.agency-manager-settings label { display: grid; gap: .45rem; font-weight: 750; }
+.agency-manager-login input:not([type=checkbox]),.agency-manager-settings input:not([type=checkbox]),.agency-manager-settings textarea { box-sizing: border-box; width: 100%; padding: .85rem 1rem; border: 1px solid #d8d4cb; border-radius: 6px; background: #fff; font: inherit; }
+.agency-manager-check { display: flex; gap: .5rem; align-items: center; }
+.agency-manager-button { display: inline-flex; justify-content: center; padding: .9rem 1.25rem; border: 0; border-radius: 6px; background: #181815; color: #fff!important; cursor: pointer; font: inherit; font-weight: 800; text-decoration: none; }
+.agency-manager-portal { box-sizing: border-box; max-width: 1220px; margin: 2rem auto 5rem; color: #171713; }
+.agency-manager-topbar { display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: 1.5rem 1.8rem; border-radius: 12px 12px 0 0; background: #181815; color: #fff; }
+.agency-manager-topbar h1 { margin: .25rem 0 0; color: #fff; font-size: 1.6rem; }
+.agency-manager-topbar > div:last-child { display: grid; gap: .25rem; text-align: right; }
+.agency-manager-topbar a { color: #d8b329; }
+.agency-manager-nav { display: flex; gap: .3rem; padding: .75rem 1rem; border: 1px solid #e4e0d7; background: #fff; }
+.agency-manager-nav a { padding: .7rem 1rem; border-radius: 6px; color: #5d5a53; font-weight: 750; text-decoration: none; }
+.agency-manager-nav a.is-active { background: #f1ede4; color: #171713; }
+.agency-manager-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin: 1.5rem 0; }
+.agency-manager-stats article { padding: 1.4rem; border: 1px solid #e4e0d7; border-radius: 10px; background: #fff; box-shadow: 0 8px 30px rgba(20,20,16,.05); }
+.agency-manager-stats span { display: block; color: #69655c; font-size: .78rem; font-weight: 800; text-transform: uppercase; }
+.agency-manager-stats strong { display: block; margin-top: .5rem; font-size: 2.2rem; }
+.agency-manager-panel { margin-top: 1.5rem; padding: clamp(1rem,3vw,2rem); border: 1px solid #e4e0d7; border-radius: 12px; background: #fff; }
+.agency-manager-panel-title { display: flex; justify-content: space-between; gap: 1rem; align-items: center; margin-bottom: 1.2rem; }
+.agency-manager-panel-title h2,.agency-manager-panel-title p { margin: .2rem 0; }
+.agency-manager-bookings { display: grid; }
+.agency-manager-bookings article { display: grid; grid-template-columns: 58px 1fr auto; gap: 1rem; align-items: center; padding: 1rem 0; border-top: 1px solid #ebe7de; }
+.agency-manager-date { display: grid; place-items: center; padding: .55rem; border-radius: 7px; background: #f2eee5; }
+.agency-manager-date strong { font-size: 1.3rem; }
+.agency-manager-date span { font-size: .7rem; text-transform: uppercase; }
+.agency-manager-booking-main h3,.agency-manager-booking-main p { margin: .3rem 0; }
+.agency-manager-actions { display: flex; gap: .45rem; }
+.agency-manager-actions button { padding: .55rem .75rem; border: 0; border-radius: 5px; background: #18794e; color: #fff; cursor: pointer; font-weight: 750; }
+.agency-manager-actions button.is-danger { background: #b42318; }
+.agency-manager-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.agency-manager-settings fieldset { padding: 1rem; border: 1px solid #e4e0d7; border-radius: 8px; }
+.agency-manager-days { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .7rem; }
+.agency-manager-days label { display: block; }
+.agency-manager-days input { position: absolute; opacity: 0; }
+.agency-manager-days span { display: block; padding: .6rem .8rem; border: 1px solid #d8d4cb; border-radius: 5px; cursor: pointer; }
+.agency-manager-days input:checked + span { border-color: #181815; background: #181815; color: #fff; }
+@media (max-width: 760px) {
+	.agency-manager-stats { grid-template-columns: repeat(2,1fr); }
+	.agency-manager-bookings article { grid-template-columns: 48px 1fr; }
+	.agency-manager-actions { grid-column: 1/-1; }
+	.agency-manager-topbar { align-items: flex-start; }
+	.agency-manager-nav { overflow-x: auto; }
+}

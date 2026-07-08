@@ -1,0 +1,21 @@
+{
+  "slug": "beauty",
+  "name": "Beauty Studio",
+  "description": "Magyar nyelvű, elegáns szépségipari bemutató oldal.",
+  "version": "1.2.0",
+  "front_page": "kezdolap",
+  "posts_page": "blog",
+  "menu_name": "Beauty Primary",
+  "files": {
+    "config": "config.json",
+    "pages": "pages.json",
+    "services": "services.json",
+    "faq": "faq.json",
+    "testimonials": "testimonials.json"
+  },
+  "content_types": {
+    "services": "agency_service",
+    "faq": "agency_faq",
+    "testimonials": "agency_testimonial"
+  }
+}

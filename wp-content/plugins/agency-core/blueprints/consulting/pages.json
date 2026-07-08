@@ -1,0 +1,115 @@
+[
+  {
+    "title": "Kezdőlap",
+    "slug": "kezdolap",
+    "menu_order": 0,
+    "sections": [
+      {
+        "component": "hero",
+        "variant": "split",
+        "data": {
+          "eyebrow": "Stratégia és megvalósítás",
+          "title": "Tisztább döntések. Jobban működő vállalkozás.",
+          "text": "Gyakorlati üzleti tanácsadás növekedéshez, működésfejlesztéshez és digitális megújuláshoz.",
+          "button_label": "Első konzultáció",
+          "button_url": "/kapcsolat/"
+        }
+      },
+      {
+        "component": "services",
+        "variant": "cards",
+        "data": {
+          "title": "Amiben segítünk",
+          "text": "Közös helyzetértékelés után a legnagyobb hatású feladatokra koncentrálunk.",
+          "limit": 6
+        }
+      },
+      {
+        "component": "faq",
+        "variant": "accordion",
+        "data": {
+          "title": "Gyakori kérdések",
+          "limit": 6
+        }
+      },
+      {
+        "component": "cta",
+        "variant": "boxed",
+        "data": {
+          "title": "Beszéljük át a következő lépést",
+          "text": "Egy rövid konzultáció során felmérjük, hol tudunk a legtöbbet segíteni.",
+          "button_label": "Kapcsolatfelvétel",
+          "button_url": "/kapcsolat/"
+        }
+      }
+    ]
+  },
+  {
+    "title": "Szolgáltatások",
+    "slug": "szolgaltatasok",
+    "menu_order": 1,
+    "sections": [
+      {
+        "component": "hero",
+        "variant": "centered",
+        "data": {
+          "eyebrow": "Együttműködési területek",
+          "title": "Szolgáltatások",
+          "text": "Rövid diagnózistól a teljes megvalósítás támogatásáig."
+        }
+      },
+      {
+        "component": "services",
+        "variant": "icon-list",
+        "data": {
+          "title": "Tanácsadási területek",
+          "limit": 12
+        }
+      }
+    ]
+  },
+  {
+    "title": "Tudásbázis",
+    "slug": "tudasbazis",
+    "menu_order": 2,
+    "sections": []
+  },
+  {
+    "title": "Kapcsolat",
+    "slug": "kapcsolat",
+    "menu_order": 3,
+    "sections": [
+      {
+        "component": "contact",
+        "variant": "section",
+        "data": {
+          "title": "Kapcsolat",
+          "text": "Írd meg röviden, milyen üzleti helyzeten dolgozol."
+        }
+      }
+    ]
+  },
+  {
+    "title": "GYIK",
+    "slug": "gyik",
+    "menu_order": 4,
+    "sections": [
+      {
+        "component": "hero",
+        "variant": "minimal",
+        "data": {
+          "eyebrow": "Az együttműködésről",
+          "title": "Gyakori kérdések"
+        }
+      },
+      {
+        "component": "faq",
+        "variant": "accordion",
+        "data": {
+          "title": "Kérdések és válaszok",
+          "limit": 20
+        }
+      }
+    ]
+  }
+]

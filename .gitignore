@@ -1,0 +1,14 @@
+/vendor/
+/.ddev/.dbimageBuild/
+/.ddev/.global_commands/
+/.ddev/.homeadditions/
+/wp-admin/
+/wp-includes/
+/wp-*.php
+/index.php
+/license.txt
+/readme.html
+/.htaccess
+/site-factory/projects/*/manager.json
+/site-factory/projects/*/operations.json
+/factory-manager-server*.log

@@ -1,0 +1,36 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Agency Theme 1.6.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-30 00:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: agency-theme\n"
+
+msgid "Primary menu"
+msgstr ""
+
+msgid "Footer menu"
+msgstr ""
+
+msgid "Skip to content"
+msgstr ""
+
+msgid "Services"
+msgstr ""
+
+msgid "Frequently asked questions"
+msgstr ""
+
+msgid "Contact"
+msgstr ""
+
+msgid "Book now"
+msgstr ""
+
+msgid "Related articles"
+msgstr ""
+
+msgid "Back to home"
+msgstr ""

@@ -1,0 +1,121 @@
+[
+  {
+    "title": "Kezdőlap",
+    "slug": "kezdolap",
+    "content": "",
+    "menu_order": 0,
+    "sections": [
+      {
+        "component": "hero",
+        "variant": "split",
+        "data": {
+          "eyebrow": "Demo Beauty Studio",
+          "title": "Természetes szépség, gondos részletek",
+          "text": "Személyre szabott kezelések nyugodt környezetben, modern szemlélettel.",
+          "button_label": "Időpontot kérek",
+          "button_url": "/kapcsolat/"
+        }
+      },
+      {
+        "component": "services",
+        "variant": "grid",
+        "data": {
+          "title": "Szolgáltatásaink",
+          "text": "Átgondolt kezelések, amelyek a természetes adottságaidat emelik ki.",
+          "limit": "6"
+        }
+      },
+      {
+        "component": "faq",
+        "variant": "accordion",
+        "data": {
+          "title": "Gyakori kérdések",
+          "limit": "6"
+        }
+      },
+      {
+        "component": "cta",
+        "variant": "booking",
+        "data": {
+          "title": "Találjuk meg a hozzád illő kezelést",
+          "text": "Kérj konzultációt, és együtt megtervezzük a következő lépést.",
+          "button_label": "Kapcsolat",
+          "button_url": "/kapcsolat/"
+        }
+      }
+    ]
+  },
+  {
+    "title": "Szolgáltatások",
+    "slug": "szolgaltatasok",
+    "content": "",
+    "menu_order": 1,
+    "sections": [
+      {
+        "component": "hero",
+        "variant": "centered",
+        "data": {
+          "eyebrow": "Kezelések",
+          "title": "Szolgáltatások",
+          "text": "Minden kezelés konzultációval és személyre szabott javaslattal indul."
+        }
+      },
+      {
+        "component": "services",
+        "variant": "featured",
+        "data": {
+          "title": "Válassz szolgáltatást",
+          "limit": "12"
+        }
+      }
+    ]
+  },
+  {
+    "title": "Blog",
+    "slug": "blog",
+    "content": "",
+    "menu_order": 2,
+    "sections": []
+  },
+  {
+    "title": "Kapcsolat",
+    "slug": "kapcsolat",
+    "content": "",
+    "menu_order": 3,
+    "sections": [
+      {
+        "component": "contact",
+        "variant": "section",
+        "data": {
+          "title": "Kapcsolat",
+          "text": "Írj vagy hívj minket, ha kérdésed van, illetve időpontot szeretnél egyeztetni."
+        }
+      }
+    ]
+  },
+  {
+    "title": "GYIK",
+    "slug": "gyik",
+    "content": "",
+    "menu_order": 4,
+    "sections": [
+      {
+        "component": "hero",
+        "variant": "minimal",
+        "data": {
+          "eyebrow": "Hasznos tudnivalók",
+          "title": "Gyakori kérdések",
+          "text": "Összegyűjtöttük a kezelések előtt leggyakrabban felmerülő kérdéseket."
+        }
+      },
+      {
+        "component": "faq",
+        "variant": "accordion",
+        "data": {
+          "title": "Kérdések és válaszok",
+          "limit": "20"
+        }
+      }
+    ]
+  }
+]

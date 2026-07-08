@@ -1,0 +1,21 @@
+{
+  "slug": "consulting",
+  "name": "Consulting Firm",
+  "description": "Magyar nyelvű B2B tanácsadói weboldal üzleti szolgáltatásokhoz.",
+  "version": "1.1.0",
+  "front_page": "kezdolap",
+  "posts_page": "tudasbazis",
+  "menu_name": "Consulting Primary",
+  "files": {
+    "config": "config.json",
+    "pages": "pages.json",
+    "services": "services.json",
+    "faq": "faq.json",
+    "testimonials": "testimonials.json"
+  },
+  "content_types": {
+    "services": "agency_service",
+    "faq": "agency_faq",
+    "testimonials": "agency_testimonial"
+  }
+}

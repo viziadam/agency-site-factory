@@ -1,0 +1,12 @@
+.agency-core-live-preview { width: 100%; max-width: none; padding: 0; }
+.agency-core-live-preview__frame {
+	display: block;
+	width: 100%;
+	height: min(78vh, 980px);
+	min-height: 680px;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+	box-shadow: 0 8px 30px rgba(0, 0, 0, .08);
+}
+.agency-core-editor-blocks-hidden { display: none !important; }

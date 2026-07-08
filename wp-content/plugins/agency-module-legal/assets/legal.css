@@ -1,0 +1,17 @@
+.agency-legal-links {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: .65rem 1.25rem;
+	width: min(100% - 2rem, 1180px);
+	margin: 1.5rem auto;
+	padding: 1rem 0;
+	border-top: 1px solid color-mix(in srgb, var(--agency-color-text, #1f2937) 14%, transparent);
+	font-size: .9rem;
+}
+.agency-legal-links a {
+	color: inherit;
+	text-decoration-color: var(--agency-color-primary, currentColor);
+	text-underline-offset: .25em;
+}
+.agency-cookie-banner{position:fixed;z-index:99999;right:1rem;bottom:1rem;left:1rem;display:flex;max-width:900px;margin:auto;gap:1.5rem;align-items:center;justify-content:space-between;padding:1.2rem 1.4rem;border:1px solid rgba(255,255,255,.15);border-radius:12px;background:#181815;color:#fff;box-shadow:0 20px 60px rgba(0,0,0,.28)}.agency-cookie-banner[hidden]{display:none}.agency-cookie-banner strong{font-size:1.05rem}.agency-cookie-banner p{margin:.35rem 0 0;color:#d4d4cf;font-size:.85rem}.agency-cookie-banner a{color:#e2bd32}.agency-cookie-banner>div:last-child{display:flex;flex-shrink:0;gap:.6rem}.agency-cookie-banner button{padding:.7rem .9rem;border:1px solid #5f5f56;border-radius:5px;background:transparent;color:#fff;cursor:pointer;font:inherit;font-weight:700}.agency-cookie-banner button.is-primary{border-color:var(--agency-color-primary,#b68b00);background:var(--agency-color-primary,#b68b00)}@media(max-width:680px){.agency-cookie-banner{align-items:stretch;flex-direction:column}.agency-cookie-banner>div:last-child{display:grid;grid-template-columns:1fr 1fr}}

@@ -1,0 +1,22 @@
+.agency-admin-heading { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin: 1rem 0; }
+.agency-admin-heading h1 { margin: 0; }
+.agency-admin-stats { display: grid; grid-template-columns: repeat(4, minmax(130px, 1fr)); gap: 1rem; margin: 1.25rem 0; }
+.agency-admin-stats article { padding: 1.2rem; border: 1px solid #dcdcde; border-radius: 10px; background: #fff; }
+.agency-admin-stats span { display: block; color: #646970; }
+.agency-admin-stats strong { display: block; margin-top: .25rem; font-size: 2rem; }
+.agency-admin-filters { display: flex; gap: .5rem; flex-wrap: wrap; padding: 1rem; border: 1px solid #dcdcde; background: #fff; }
+.agency-admin-calendar { margin: 1.25rem 0; padding: 1rem; border: 1px solid #dcdcde; border-radius: 10px; background: #fff; }
+.agency-admin-calendar-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .75rem; }
+.agency-admin-calendar-grid article { display: grid; gap: .25rem; padding: .9rem; border-left: 4px solid #2271b1; background: #f6f7f7; }
+.agency-admin-calendar-grid time { font-weight: 700; }
+.agency-admin-table-wrap { overflow-x: auto; }
+.agency-admin-table-wrap textarea { width: 100%; margin: .5rem 0; }
+.agency-admin-actions { display: flex; flex-wrap: wrap; gap: .35rem; }
+.agency-admin-status { display: inline-flex; padding: .2rem .55rem; border-radius: 999px; background: #dcdcde; font-weight: 700; }
+.agency-admin-status--pending { background: #fcf0c3; color: #6e4b00; }
+.agency-admin-status--approved, .agency-admin-status--completed { background: #d7f0df; color: #005a20; }
+.agency-admin-status--rejected, .agency-admin-status--cancelled { background: #f8d7da; color: #8a2424; }
+@media (max-width: 780px) {
+	.agency-admin-heading { display: block; }
+	.agency-admin-stats { grid-template-columns: repeat(2, 1fr); }
+}

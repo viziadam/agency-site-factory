@@ -1,0 +1,50 @@
+.agency-core-section {
+	margin: 12px 0;
+	padding: 12px;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	background: #fff;
+}
+.agency-core-section__title {
+	margin: 0 0 12px;
+	font-weight: 600;
+}
+.agency-core-section__meta {
+	margin: -8px 0 12px;
+	color: #646970;
+	font-size: 12px;
+}
+.agency-core-section__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-top: 12px;
+}
+.agency-core-section-editor__empty {
+	padding: 12px;
+	border: 1px dashed #c3c4c7;
+	color: #646970;
+}
+.agency-core-blueprints {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 20px;
+	max-width: 1100px;
+	margin-top: 24px;
+}
+.agency-core-blueprints .card {
+	max-width: none;
+	margin: 0;
+}
+.agency-core-live-preview { width: 100%; max-width: none; padding: 0; }
+.agency-core-live-preview__frame {
+	display: block;
+	width: 100%;
+	height: min(78vh, 980px);
+	min-height: 680px;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+	box-shadow: 0 8px 30px rgba(0, 0, 0, .08);
+}
+.agency-core-editor-blocks-hidden { display: none !important; }

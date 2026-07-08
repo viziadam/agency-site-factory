@@ -1,0 +1,17 @@
+.agency-client-admin-page .agency-entry {
+	margin: 0;
+	padding: 0;
+}
+.agency-client-admin-page .agency-entry > .agency-container,
+.agency-client-admin-page .agency-entry > .agency-container--narrow,
+.agency-client-admin-page .agency-prose {
+	width: 100%;
+	max-width: none;
+	margin: 0;
+	padding: 0;
+}
+.agency-client-admin-page .agency-entry > .agency-container > h1,
+.agency-client-admin-page .agency-entry .agency-breadcrumbs,
+.agency-client-admin-page .screen-reader-text {
+	display: none;
+}

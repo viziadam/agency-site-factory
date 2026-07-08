@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+## Description: Install a fresh WordPress site and activate the Agency Site Factory
+## Usage: setup-agency
+## Example: ddev setup-agency
+
+set -euo pipefail
+
+ddev wp core download --force
+if [ ! -f wp-config.php ]; then
+	ddev wp config create --dbname=db --dbuser=db --dbpass=db --dbhost=db
+fi
+if ! ddev wp core is-installed >/dev/null 2>&1; then
+	ddev wp core install \
+		--url="https://agency-site-factory.ddev.site" \
+		--title="Agency Site Factory" \
+		--admin_user="admin" \
+		--admin_password="agency-local-only" \
+		--admin_email="admin@example.test"
+fi
+ddev wp plugin activate agency-core
+ddev wp theme activate agency-theme
+ddev wp agency blueprint import beauty
+ddev launch /wp-admin/
+

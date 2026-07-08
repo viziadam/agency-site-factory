@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<ruleset name="Agency Site Factory">
+	<description>Advisory WordPress Coding Standards profile.</description>
+	<file>wp-content/plugins/agency-core</file>
+	<file>wp-content/themes/agency-theme</file>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<arg name="extensions" value="php"/>
+	<arg value="sp"/>
+	<rule ref="WordPress-Extra"/>
+	<rule ref="WordPress-Docs"/>
+	<config name="minimum_supported_wp_version" value="6.0"/>
+	<config name="testVersion" value="8.0-"/>
+</ruleset>
+

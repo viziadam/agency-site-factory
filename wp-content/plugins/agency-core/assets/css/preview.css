@@ -1,0 +1,15 @@
+.agency-preview-body { min-width: 320px; }
+.agency-preview-toolbar {
+	position: sticky;
+	z-index: 9999;
+	top: 0;
+	padding: 7px 16px;
+	border-bottom: 1px solid rgba(23, 17, 13, .16);
+	background: var(--agency-color-primary);
+	color: var(--agency-color-secondary);
+	font: 700 12px/1.4 var(--agency-font-body);
+	letter-spacing: .04em;
+	text-align: center;
+}
+.agency-preview-body a { pointer-events: none; }
+

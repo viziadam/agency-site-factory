@@ -1,0 +1,82 @@
+name: Agency Site Factory CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  syntax-and-contracts:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ["8.0", "8.2", "8.3"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: PHP syntax
+        run: find . -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Blueprint contracts
+        run: php tests/blueprint-contract.php
+      - name: JavaScript syntax
+        run: find wp-content -name '*.js' -print0 | xargs -0 -n1 node --check
+
+  coding-standards-advisory:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          tools: composer
+      - run: composer install --no-interaction --prefer-dist
+      - run: vendor/bin/phpcs
+
+  wordpress-integration:
+    runs-on: ubuntu-latest
+    services:
+      database:
+        image: mariadb:10.11
+        env:
+          MARIADB_DATABASE: agency_test
+          MARIADB_USER: agency
+          MARIADB_PASSWORD: agency
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mysqli
+      - name: Install WP-CLI and WordPress
+        run: |
+          curl -L -o wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          chmod +x wp
+          sudo mv wp /usr/local/bin/wp
+          wp core download --path=/tmp/agency-wp
+          wp config create --path=/tmp/agency-wp --dbname=agency_test --dbuser=agency --dbpass=agency --dbhost=127.0.0.1
+          wp core install --path=/tmp/agency-wp --url=http://localhost --title=Agency --admin_user=admin --admin_password=test-password --admin_email=admin@example.test
+      - name: Install and activate factory
+        run: |
+          cp -R wp-content/plugins/agency-core /tmp/agency-wp/wp-content/plugins/
+          cp -R wp-content/themes/agency-theme /tmp/agency-wp/wp-content/themes/
+          wp plugin activate agency-core --path=/tmp/agency-wp
+          wp theme activate agency-theme --path=/tmp/agency-wp
+      - name: Import and idempotency smoke tests
+        working-directory: /tmp/agency-wp
+        run: |
+          bash "$GITHUB_WORKSPACE/tests/wp-cli-idempotency.sh" beauty
+          bash "$GITHUB_WORKSPACE/tests/wp-cli-idempotency.sh" consulting
+          test "$(wp option get show_on_front)" = "page"

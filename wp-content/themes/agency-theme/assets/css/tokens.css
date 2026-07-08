@@ -1,0 +1,17 @@
+:root {
+	--agency-color-primary: #d4ad32;
+	--agency-color-secondary: #17110d;
+	--agency-color-background: #fffaf4;
+	--agency-color-surface: #ffffff;
+	--agency-color-text: #17110d;
+	--agency-color-muted: #6f6258;
+	--agency-font-heading: Georgia, "Times New Roman", serif;
+	--agency-font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	--agency-container: 1220px;
+	--agency-radius-sm: 6px;
+	--agency-radius-md: 14px;
+	--agency-radius-lg: 24px;
+	--agency-shadow-card: 0 20px 60px rgba(0, 0, 0, .08);
+	--agency-section-padding: clamp(56px, 8vw, 120px);
+}
+
