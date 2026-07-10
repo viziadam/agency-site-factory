@@ -33,8 +33,8 @@ function agency_auth_verify_request() {
 	$expires = absint( get_user_meta( $user_id, '_agency_verify_expires', true ) );
 	if ( $hash && $expires >= time() && wp_check_password( $token, $hash ) ) {
 		update_user_meta( $user_id, '_agency_email_verified', '1' );
+		update_user_meta( $user_id, '_agency_email_verified_at', current_time( 'mysql', true ) );
 		delete_user_meta( $user_id, '_agency_verify_hash' );
-		delete_user_meta( $user_id, '_agency_verify_expires' );
 		if ( function_exists( 'agency_core_audit_log' ) ) {
 			agency_core_audit_log( 'auth', 'email_verified', array( 'verified_user_id' => $user_id ) );
 		}

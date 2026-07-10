@@ -12,3 +12,17 @@
 /site-factory/projects/*/manager.json
 /site-factory/projects/*/operations.json
 /factory-manager-server*.log
+
+.env
+.env.*
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.bak
+*.backup
+site-factory/backups/
+backups/
+dist/
+build/

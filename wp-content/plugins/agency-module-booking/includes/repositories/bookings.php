@@ -12,6 +12,106 @@ function agency_booking_table() {
 	return $wpdb->prefix . 'agency_bookings';
 }
 
+function agency_booking_table_exists() {
+	global $wpdb;
+
+	$table = agency_booking_table();
+
+	return $wpdb->get_var(
+		$wpdb->prepare(
+			'SHOW TABLES LIKE %s',
+			$table
+		)
+	) === $table;
+}
+
+function agency_booking_ensure_schema() {
+	if ( ! agency_booking_table_exists() || version_compare( (string) get_option( 'agency_module_booking_db_version', '0' ), AGENCY_BOOKING_DB_VERSION, '<' ) ) {
+		agency_booking_migrate();
+	}
+
+	return agency_booking_table_exists();
+}
+
+function agency_booking_insert( $data ) {
+	global $wpdb;
+
+	if ( ! agency_booking_ensure_schema() ) {
+		return new WP_Error(
+			'agency_booking_table_missing',
+			__( 'The booking database table is missing.', 'agency-module-booking' )
+		);
+	}
+
+	$defaults = array(
+		'user_id'           => 0,
+		'service_id'        => 0,
+		'start_at'          => '',
+		'end_at'            => '',
+		'name'              => '',
+		'email'             => '',
+		'phone'             => '',
+		'customer_note'     => '',
+		'admin_note'        => '',
+		'status'            => 'pending',
+		'verification_hash' => '',
+		'created_at'        => current_time( 'mysql', true ),
+		'updated_at'        => current_time( 'mysql', true ),
+	);
+
+	$data = wp_parse_args( (array) $data, $defaults );
+
+	$inserted = $wpdb->insert(
+		agency_booking_table(),
+		array(
+			'user_id'           => absint( $data['user_id'] ),
+			'service_id'        => absint( $data['service_id'] ),
+			'start_at'          => sanitize_text_field( $data['start_at'] ),
+			'end_at'            => sanitize_text_field( $data['end_at'] ),
+			'name'              => sanitize_text_field( $data['name'] ),
+			'email'             => sanitize_email( $data['email'] ),
+			'phone'             => sanitize_text_field( $data['phone'] ),
+			'customer_note'     => sanitize_textarea_field( $data['customer_note'] ),
+			'admin_note'        => sanitize_textarea_field( $data['admin_note'] ),
+			'status'            => sanitize_key( $data['status'] ),
+			'verification_hash' => (string) $data['verification_hash'],
+			'created_at'        => sanitize_text_field( $data['created_at'] ),
+			'updated_at'        => sanitize_text_field( $data['updated_at'] ),
+		),
+		array(
+			'%d',
+			'%d',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+		)
+	);
+
+	if ( ! $inserted ) {
+		return new WP_Error(
+			'agency_booking_insert_failed',
+			$wpdb->last_error ? $wpdb->last_error : __( 'The booking could not be saved.', 'agency-module-booking' )
+		);
+	}
+
+	$booking_id = absint( $wpdb->insert_id );
+
+	return $wpdb->get_row(
+		$wpdb->prepare(
+			'SELECT * FROM ' . agency_booking_table() . ' WHERE id = %d',
+			$booking_id
+		)
+	);
+}
+
 function agency_booking_defaults() {
 	return array(
 		'booking_enabled'      => 1,

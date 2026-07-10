@@ -10,6 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once get_template_directory() . '/inc/components.php';
+require_once get_template_directory() . '/inc/auth-actions.php';
 
 function agency_theme_setup() {
 	load_theme_textdomain( 'agency-theme', get_template_directory() . '/languages' );

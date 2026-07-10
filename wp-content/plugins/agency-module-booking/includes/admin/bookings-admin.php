@@ -15,6 +15,16 @@ add_action( 'admin_menu', 'agency_booking_admin_menu', 30 );
 
 function agency_booking_admin_stats() {
 	global $wpdb;
+
+	if ( ! agency_booking_ensure_schema() ) {
+		return array(
+			'today'   => 0,
+			'week'    => 0,
+			'month'   => 0,
+			'pending' => 0,
+		);
+	}
+
 	$table = agency_booking_table();
 	$now   = current_time( 'mysql', true );
 	$today_local = new DateTimeImmutable( 'today', wp_timezone() );
@@ -33,6 +43,11 @@ function agency_booking_admin_stats() {
 
 function agency_booking_admin_query() {
 	global $wpdb;
+
+	if ( ! agency_booking_ensure_schema() ) {
+		return array();
+	}
+
 	$status = sanitize_key( wp_unslash( $_GET['booking_status'] ?? '' ) );
 	$search = sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) );
 	$date   = sanitize_text_field( wp_unslash( $_GET['booking_date'] ?? '' ) );

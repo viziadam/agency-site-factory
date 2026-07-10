@@ -189,21 +189,47 @@ function agency_booking_create() {
 	$status      = 'auto' === $settings['confirmation_mode'] && is_user_logged_in() ? 'approved' : 'pending';
 	$guest_token = is_user_logged_in() ? '' : bin2hex( random_bytes( 24 ) );
 	$now         = current_time( 'mysql', true );
-	$inserted    = $wpdb->insert(
-		agency_booking_table(),
+	$booking = agency_booking_insert(
 		array(
-			'user_id' => get_current_user_id(), 'service_id' => $service_id, 'start_at' => $start_at, 'end_at' => $end_at,
-			'name' => $name, 'email' => $email, 'phone' => $phone, 'customer_note' => sanitize_textarea_field( wp_unslash( $_POST['note'] ?? '' ) ),
-			'admin_note' => '', 'status' => $status, 'verification_hash' => $guest_token ? wp_hash_password( $guest_token ) : '', 'created_at' => $now, 'updated_at' => $now,
-		),
-		array( '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
+			'user_id'           => get_current_user_id(),
+			'service_id'        => $service_id,
+			'start_at'          => $start_at,
+			'end_at'            => $end_at,
+			'name'              => $name,
+			'email'             => $email,
+			'phone'             => $phone,
+			'customer_note'     => sanitize_textarea_field( wp_unslash( $_POST['note'] ?? '' ) ),
+			'admin_note'        => '',
+			'status'            => $status,
+			'verification_hash' => $guest_token ? wp_hash_password( $guest_token ) : '',
+			'created_at'        => $now,
+			'updated_at'        => $now,
+		)
 	);
-	if ( ! $inserted ) {
-		$wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock_name ) );
-		wp_safe_redirect( add_query_arg( 'booking', 'error', $redirect ) ); exit;
+
+	$wpdb->get_var(
+		$wpdb->prepare(
+			'SELECT RELEASE_LOCK(%s)',
+			$lock_name
+		)
+	);
+
+	if ( is_wp_error( $booking ) || ! $booking ) {
+		if ( function_exists( 'agency_core_audit_log' ) ) {
+			agency_core_audit_log(
+				'booking',
+				'create_failed',
+				array(
+					'service_id' => $service_id,
+					'start_at'   => $start_at,
+					'error'      => is_wp_error( $booking ) ? $booking->get_error_message() : 'empty_booking_row',
+				)
+			);
+		}
+
+		wp_safe_redirect( add_query_arg( 'booking', 'error', $redirect ) );
+		exit;
 	}
-	$booking = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . agency_booking_table() . ' WHERE id=%d', $wpdb->insert_id ) );
-	$wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock_name ) );
 	$verification_message = '';
 	if ( $guest_token ) {
 		$verify_url = add_query_arg( array( 'agency_booking_verify' => $booking->id, 'token' => rawurlencode( $guest_token ) ), home_url( '/' ) );

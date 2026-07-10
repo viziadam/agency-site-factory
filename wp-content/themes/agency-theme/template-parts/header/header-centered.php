@@ -17,6 +17,11 @@
 		<nav class="agency-navigation" aria-label="<?php esc_attr_e( 'Primary navigation', 'agency-theme' ); ?>">
 			<?php wp_nav_menu( array( 'theme_location' => 'primary', 'container' => false, 'menu_class' => 'agency-menu', 'fallback_cb' => false, 'depth' => 2 ) ); ?>
 		</nav>
+		<?php
+		if ( function_exists( 'agency_theme_render_auth_actions' ) ) {
+			agency_theme_render_auth_actions();
+		}
+		?>
 	</div>
 </header>
 

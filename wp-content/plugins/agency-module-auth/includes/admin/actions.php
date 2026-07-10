@@ -20,6 +20,14 @@ function agency_auth_admin_user_action() {
 	}
 	if ( 'resend' === $action ) {
 		agency_auth_send_verification( $user_id );
+	} elseif ( 'verify' === $action ) {
+		update_user_meta( $user_id, '_agency_email_verified', '1' );
+		update_user_meta( $user_id, '_agency_email_verified_at', current_time( 'mysql', true ) );
+		delete_user_meta( $user_id, '_agency_verify_hash' );
+		delete_user_meta( $user_id, '_agency_verify_expires' );
+	} elseif ( 'unverify' === $action ) {
+		update_user_meta( $user_id, '_agency_email_verified', '0' );
+		delete_user_meta( $user_id, '_agency_email_verified_at' );
 	} elseif ( 'block' === $action ) {
 		update_user_meta( $user_id, '_agency_auth_blocked', '1' );
 	} elseif ( 'unblock' === $action ) {

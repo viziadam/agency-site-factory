@@ -19,6 +19,11 @@ $booking_url = function_exists( 'agency_core_get_setting' ) ? agency_core_get_se
 		<nav class="agency-navigation" aria-label="<?php esc_attr_e( 'Primary navigation', 'agency-theme' ); ?>">
 			<?php wp_nav_menu( array( 'theme_location' => 'primary', 'container' => false, 'menu_class' => 'agency-menu', 'fallback_cb' => false, 'depth' => 1 ) ); ?>
 		</nav>
+		<?php
+		if ( function_exists( 'agency_theme_render_auth_actions' ) ) {
+			agency_theme_render_auth_actions();
+		}
+		?>
 		<?php if ( $booking_url ) : ?>
 			<a class="agency-button agency-button--primary agency-header-cta" href="<?php echo esc_url( $booking_url ); ?>"><?php esc_html_e( 'Book now', 'agency-theme' ); ?></a>
 		<?php endif; ?>

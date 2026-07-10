@@ -260,13 +260,47 @@ function agency_core_client_admin_login() {
 add_action( 'admin_post_nopriv_agency_core_client_admin_login', 'agency_core_client_admin_login' );
 add_action( 'admin_post_agency_core_client_admin_login', 'agency_core_client_admin_login' );
 
+function agency_core_client_portal_can_manage_users() {
+	agency_core_client_admin_bootstrap_session();
+
+	if ( current_user_can( 'manage_options' ) ) {
+		return true;
+	}
+
+	$user = wp_get_current_user();
+
+	return $user && in_array( 'agency_client_admin', (array) $user->roles, true );
+}
+
 function agency_core_client_portal_tabs() {
 	$tabs = array(
-		'overview' => array( 'label' => __( 'Overview', 'agency-core' ), 'callback' => 'agency_core_client_portal_overview', 'order' => 10 ),
-		'settings' => array( 'label' => __( 'Website settings', 'agency-core' ), 'callback' => 'agency_core_client_portal_settings', 'order' => 100 ),
+		'overview' => array(
+			'label'    => __( 'Overview', 'agency-core' ),
+			'callback' => 'agency_core_client_portal_overview',
+			'order'    => 10,
+		),
+		'settings' => array(
+			'label'    => __( 'Website settings', 'agency-core' ),
+			'callback' => 'agency_core_client_portal_settings',
+			'order'    => 100,
+		),
 	);
+
+	if ( agency_core_client_portal_can_manage_users() ) {
+		$tabs['users'] = array(
+			'label'    => __( 'Users', 'agency-core' ),
+			'callback' => 'agency_core_client_portal_users',
+			'order'    => 90,
+		);
+	}
+
 	$tabs = apply_filters( 'agency_client_portal_tabs', $tabs );
-	uasort( $tabs, static fn( $a, $b ) => ( $a['order'] ?? 50 ) <=> ( $b['order'] ?? 50 ) );
+
+	uasort(
+		$tabs,
+		static fn( $a, $b ) => ( $a['order'] ?? 50 ) <=> ( $b['order'] ?? 50 )
+	);
+
 	return $tabs;
 }
 
@@ -315,6 +349,309 @@ function agency_core_client_portal_settings() {
 	);
 	?><div class="agency-client-panel"><h2><?php esc_html_e( 'Website identity and contact details', 'agency-core' ); ?></h2><form class="agency-client-settings-form" method="post" action="<?php echo esc_url( agency_core_client_admin_action_url( 'agency_core_client_settings', 'settings' ) ); ?>"><input type="hidden" name="agency_portal_action" value="agency_core_client_settings"><?php wp_nonce_field( 'agency_core_client_settings' ); ?><?php foreach ( $fields as $key => $field ) : ?><label><span><?php echo esc_html( $field[0] ); ?></span><input type="<?php echo esc_attr( $field[1] ); ?>" name="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( $s[ $key ] ?? '' ); ?>"></label><?php endforeach; ?><button class="agency-client-button"><?php esc_html_e( 'Save website settings', 'agency-core' ); ?></button></form></div><div class="agency-client-panel agency-client-account-panel"><h2><?php esc_html_e( 'Portal session', 'agency-core' ); ?></h2><p><?php esc_html_e( 'This portal uses a dedicated access-token cookie and does not create a normal WordPress login session.', 'agency-core' ); ?></p><a class="agency-client-button" href="<?php echo esc_url( wp_lostpassword_url( agency_core_client_admin_url() ) ); ?>"><?php esc_html_e( 'Change or reset password', 'agency-core' ); ?></a></div><?php
 }
+
+function agency_core_client_portal_user_roles() {
+	$roles = array(
+		'agency_client_admin' => __( 'Client admin', 'agency-core' ),
+	);
+
+	if ( get_role( 'agency_booking_manager' ) ) {
+		$roles['agency_booking_manager'] = __( 'Booking manager', 'agency-core' );
+	}
+
+	if ( get_role( 'agency_customer' ) ) {
+		$roles['agency_customer'] = __( 'Customer', 'agency-core' );
+	}
+
+	return $roles;
+}
+
+function agency_core_client_portal_user_status( $user ) {
+	$is_customer = in_array( 'agency_customer', (array) $user->roles, true );
+	$blocked     = get_user_meta( $user->ID, '_agency_auth_blocked', true );
+
+	if ( $blocked ) {
+		return __( 'Blocked', 'agency-core' );
+	}
+
+	if ( $is_customer ) {
+		$verified = function_exists( 'agency_auth_is_verified' )
+			? agency_auth_is_verified( $user->ID )
+			: '1' === get_user_meta( $user->ID, '_agency_email_verified', true );
+
+		return $verified ? __( 'Email verified', 'agency-core' ) : __( 'Pending email verification', 'agency-core' );
+	}
+
+	return __( 'Active', 'agency-core' );
+}
+
+function agency_core_client_portal_users() {
+	if ( ! agency_core_client_portal_can_manage_users() ) {
+		wp_die( esc_html__( 'Insufficient permissions.', 'agency-core' ), 403 );
+	}
+
+	$roles = agency_core_client_portal_user_roles();
+	$users = get_users(
+		array(
+			'role__in' => array_keys( $roles ),
+			'number'   => 300,
+			'orderby'  => 'registered',
+			'order'    => 'DESC',
+		)
+	);
+
+	$action_url = agency_core_client_admin_action_url( 'agency_core_portal_user_save', 'users' );
+	?>
+	<div class="agency-client-panel agency-client-users-panel">
+		<h2><?php esc_html_e( 'Create portal user', 'agency-core' ); ?></h2>
+		<p><?php esc_html_e( 'Use this for client admins, booking managers or customer accounts that should be visible in the client portal.', 'agency-core' ); ?></p>
+
+		<form class="agency-client-user-create-form" method="post" action="<?php echo esc_url( $action_url ); ?>">
+			<input type="hidden" name="agency_portal_action" value="agency_core_portal_user_save">
+			<input type="hidden" name="user_save_mode" value="create">
+			<?php wp_nonce_field( 'agency_core_portal_user_save' ); ?>
+
+			<label>
+				<span><?php esc_html_e( 'Name', 'agency-core' ); ?></span>
+				<input required name="display_name" autocomplete="name">
+			</label>
+
+			<label>
+				<span><?php esc_html_e( 'Email', 'agency-core' ); ?></span>
+				<input required type="email" name="email" autocomplete="email">
+			</label>
+
+			<label>
+				<span><?php esc_html_e( 'Role', 'agency-core' ); ?></span>
+				<select name="role">
+					<?php foreach ( $roles as $role_key => $role_label ) : ?>
+						<option value="<?php echo esc_attr( $role_key ); ?>"><?php echo esc_html( $role_label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			</label>
+
+			<label>
+				<span><?php esc_html_e( 'Password', 'agency-core' ); ?></span>
+				<input type="password" name="password" minlength="12" autocomplete="new-password">
+				<small><?php esc_html_e( 'Leave empty to generate a strong password and send a reset email.', 'agency-core' ); ?></small>
+			</label>
+
+			<label class="agency-client-check">
+				<input type="checkbox" name="send_invite" value="1" checked>
+				<?php esc_html_e( 'Send password setup / reset email', 'agency-core' ); ?>
+			</label>
+
+			<button class="agency-client-button"><?php esc_html_e( 'Save user', 'agency-core' ); ?></button>
+		</form>
+	</div>
+
+	<div class="agency-client-panel agency-client-users-panel">
+		<h2><?php esc_html_e( 'Users', 'agency-core' ); ?></h2>
+
+		<div class="agency-client-users-table">
+			<table>
+				<thead>
+					<tr>
+						<th><?php esc_html_e( 'User', 'agency-core' ); ?></th>
+						<th><?php esc_html_e( 'Role', 'agency-core' ); ?></th>
+						<th><?php esc_html_e( 'Email status', 'agency-core' ); ?></th>
+						<th><?php esc_html_e( 'Registered', 'agency-core' ); ?></th>
+						<th><?php esc_html_e( 'Actions', 'agency-core' ); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php if ( ! $users ) : ?>
+						<tr>
+							<td colspan="5"><?php esc_html_e( 'No users found.', 'agency-core' ); ?></td>
+						</tr>
+					<?php endif; ?>
+
+					<?php foreach ( $users as $user ) : ?>
+						<?php
+						$user_roles  = array_intersect_key( $roles, array_flip( (array) $user->roles ) );
+						$is_customer = in_array( 'agency_customer', (array) $user->roles, true );
+						$verified_at = get_user_meta( $user->ID, '_agency_email_verified_at', true );
+						$blocked     = get_user_meta( $user->ID, '_agency_auth_blocked', true );
+						$status      = agency_core_client_portal_user_status( $user );
+						?>
+						<tr>
+							<td>
+								<strong><?php echo esc_html( $user->display_name ?: $user->user_login ); ?></strong><br>
+								<a href="mailto:<?php echo esc_attr( $user->user_email ); ?>"><?php echo esc_html( $user->user_email ?: '—' ); ?></a>
+							</td>
+							<td><?php echo esc_html( implode( ', ', $user_roles ?: $user->roles ) ); ?></td>
+							<td>
+								<span class="agency-client-user-status <?php echo $blocked ? 'is-blocked' : ( $is_customer && ! $verified_at ? 'is-pending' : 'is-ok' ); ?>">
+									<?php echo esc_html( $status ); ?>
+								</span>
+								<?php if ( $verified_at ) : ?>
+									<br><small><?php echo esc_html( get_date_from_gmt( $verified_at, get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) ) ); ?></small>
+								<?php endif; ?>
+							</td>
+							<td><?php echo esc_html( get_date_from_gmt( $user->user_registered, get_option( 'date_format' ) ) ); ?></td>
+							<td>
+								<form method="post" action="<?php echo esc_url( $action_url ); ?>" class="agency-client-user-actions">
+									<input type="hidden" name="agency_portal_action" value="agency_core_portal_user_save">
+									<input type="hidden" name="user_save_mode" value="action">
+									<input type="hidden" name="user_id" value="<?php echo absint( $user->ID ); ?>">
+									<?php wp_nonce_field( 'agency_core_portal_user_save' ); ?>
+
+									<?php if ( $is_customer ) : ?>
+										<?php if ( function_exists( 'agency_auth_is_verified' ) && ! agency_auth_is_verified( $user->ID ) ) : ?>
+											<button name="user_action" value="resend"><?php esc_html_e( 'Resend verification', 'agency-core' ); ?></button>
+											<button name="user_action" value="verify"><?php esc_html_e( 'Mark verified', 'agency-core' ); ?></button>
+										<?php else : ?>
+											<button name="user_action" value="unverify"><?php esc_html_e( 'Mark unverified', 'agency-core' ); ?></button>
+										<?php endif; ?>
+
+										<button name="user_action" value="<?php echo $blocked ? 'unblock' : 'block'; ?>">
+											<?php echo $blocked ? esc_html__( 'Unblock', 'agency-core' ) : esc_html__( 'Block', 'agency-core' ); ?>
+										</button>
+									<?php endif; ?>
+
+									<button name="user_action" value="reset"><?php esc_html_e( 'Send password reset', 'agency-core' ); ?></button>
+								</form>
+							</td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<?php
+}
+
+function agency_core_client_portal_user_save() {
+	if ( ! agency_core_client_portal_can_manage_users() ) {
+		wp_die( esc_html__( 'Insufficient permissions.', 'agency-core' ), 403 );
+	}
+
+	check_admin_referer( 'agency_core_portal_user_save' );
+
+	$mode  = sanitize_key( wp_unslash( $_POST['user_save_mode'] ?? '' ) );
+	$roles = agency_core_client_portal_user_roles();
+
+	if ( 'create' === $mode ) {
+		$email = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
+		$name  = sanitize_text_field( wp_unslash( $_POST['display_name'] ?? '' ) );
+		$role  = sanitize_key( wp_unslash( $_POST['role'] ?? '' ) );
+		$pass  = (string) wp_unslash( $_POST['password'] ?? '' );
+
+		if ( ! is_email( $email ) || ! isset( $roles[ $role ] ) ) {
+			wp_safe_redirect( add_query_arg( 'users', 'invalid', agency_core_client_admin_url( 'users' ) ) );
+			exit;
+		}
+
+		if ( '' !== $pass && strlen( $pass ) < 12 ) {
+			wp_safe_redirect( add_query_arg( 'users', 'weak-password', agency_core_client_admin_url( 'users' ) ) );
+			exit;
+		}
+
+		$user_id = email_exists( $email );
+
+		if ( $user_id ) {
+			$user = get_user_by( 'id', $user_id );
+			$user->add_role( $role );
+
+			wp_update_user(
+				array(
+					'ID'           => $user_id,
+					'display_name' => $name ?: $user->display_name,
+				)
+			);
+		} else {
+			$username = sanitize_user( strstr( $email, '@', true ), true ) ?: 'portal-user';
+
+			for ( $index = 2; username_exists( $username ); $index++ ) {
+				$username = sanitize_user( strstr( $email, '@', true ), true ) . $index;
+			}
+
+			$user_id = wp_insert_user(
+				array(
+					'user_login'   => $username,
+					'user_email'   => $email,
+					'display_name' => $name ?: $email,
+					'user_pass'    => $pass ?: wp_generate_password( 24, true, true ),
+					'role'         => $role,
+				)
+			);
+
+			if ( is_wp_error( $user_id ) ) {
+				wp_safe_redirect( add_query_arg( 'users', 'error', agency_core_client_admin_url( 'users' ) ) );
+				exit;
+			}
+		}
+
+		if ( 'agency_customer' === $role ) {
+			update_user_meta( $user_id, '_agency_email_verified', '0' );
+		}
+
+		if ( ! empty( $_POST['send_invite'] ) ) {
+			$user = get_user_by( 'id', $user_id );
+
+			if ( $user ) {
+				retrieve_password( $user->user_login );
+			}
+		}
+
+		if ( function_exists( 'agency_core_audit_log' ) ) {
+			agency_core_audit_log(
+				'portal',
+				'user_saved',
+				array(
+					'user_id' => absint( $user_id ),
+					'role'    => $role,
+				)
+			);
+		}
+
+		wp_safe_redirect( add_query_arg( 'users', 'saved', agency_core_client_admin_url( 'users' ) ) );
+		exit;
+	}
+
+	$user_id = absint( $_POST['user_id'] ?? 0 );
+	$action  = sanitize_key( wp_unslash( $_POST['user_action'] ?? '' ) );
+	$user    = get_userdata( $user_id );
+
+	if ( ! $user ) {
+		wp_safe_redirect( add_query_arg( 'users', 'missing', agency_core_client_admin_url( 'users' ) ) );
+		exit;
+	}
+
+	if ( 'resend' === $action && function_exists( 'agency_auth_send_verification' ) ) {
+		agency_auth_send_verification( $user_id );
+	} elseif ( 'verify' === $action ) {
+		update_user_meta( $user_id, '_agency_email_verified', '1' );
+		update_user_meta( $user_id, '_agency_email_verified_at', current_time( 'mysql', true ) );
+		delete_user_meta( $user_id, '_agency_verify_hash' );
+		delete_user_meta( $user_id, '_agency_verify_expires' );
+	} elseif ( 'unverify' === $action ) {
+		update_user_meta( $user_id, '_agency_email_verified', '0' );
+		delete_user_meta( $user_id, '_agency_email_verified_at' );
+	} elseif ( 'block' === $action ) {
+		update_user_meta( $user_id, '_agency_auth_blocked', '1' );
+	} elseif ( 'unblock' === $action ) {
+		delete_user_meta( $user_id, '_agency_auth_blocked' );
+	} elseif ( 'reset' === $action ) {
+		retrieve_password( $user->user_login );
+	}
+
+	if ( function_exists( 'agency_core_audit_log' ) ) {
+		agency_core_audit_log(
+			'portal',
+			'user_action',
+			array(
+				'user_id' => $user_id,
+				'action'  => $action,
+			)
+		);
+	}
+
+	wp_safe_redirect( add_query_arg( 'users', 'updated', agency_core_client_admin_url( 'users' ) ) );
+	exit;
+}
+
+add_action( 'agency_client_portal_action_agency_core_portal_user_save', 'agency_core_client_portal_user_save' );
 
 function agency_core_client_settings_save() {
 	if ( ! agency_core_can_manage_portal() ) {

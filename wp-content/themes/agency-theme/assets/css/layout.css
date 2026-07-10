@@ -80,3 +80,55 @@
 	.agency-menu { gap: .5rem 1rem; }
 	.agency-site-footer__grid { grid-template-columns: 1fr; gap: 2rem; }
 }
+
+.agency-header-auth {
+	display: flex;
+	align-items: center;
+	gap: .65rem;
+	margin-left: auto;
+	white-space: nowrap;
+}
+
+.agency-header-auth__user {
+	color: var(--agency-color-muted);
+	font-size: .85rem;
+	font-weight: 700;
+}
+
+.agency-header-auth__link {
+	color: inherit;
+	font-size: .92rem;
+	font-weight: 800;
+	text-decoration: none;
+}
+
+.agency-header-auth__button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: .62rem .9rem;
+	border: 1px solid var(--agency-color-primary);
+	border-radius: 999px;
+	background: var(--agency-color-primary);
+	color: #fff !important;
+	font-size: .9rem;
+	font-weight: 850;
+	text-decoration: none;
+}
+
+.agency-header-auth__button--secondary {
+	border-color: rgba(23, 17, 13, .16);
+	background: transparent;
+	color: inherit !important;
+}
+
+.agency-site-header--split .agency-header-auth {
+	margin-left: 0;
+}
+
+@media (max-width: 760px) {
+	.agency-header-auth {
+		flex-wrap: wrap;
+		margin-left: 0;
+	}
+}

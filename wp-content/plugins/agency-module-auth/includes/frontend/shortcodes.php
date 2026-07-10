@@ -79,6 +79,9 @@ add_filter( 'show_admin_bar', static fn( $show ) => current_user_can( 'agency_cu
 
 function agency_auth_menu_items( $items, $args ) {
 	$s = agency_auth_settings();
+	if ( function_exists( 'agency_theme_render_auth_actions' ) && apply_filters( 'agency_auth_prefer_header_actions', true ) ) {
+		return $items;
+	}
 	$auto_links = $s['auto_add_auth_links'] ?? $s['auto_add_to_menu'] ?? true;
 	if ( ! $auto_links || 'primary' !== ( $args->theme_location ?? '' ) ) {
 		return $items;
