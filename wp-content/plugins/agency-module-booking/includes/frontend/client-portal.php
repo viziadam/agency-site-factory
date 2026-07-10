@@ -75,6 +75,7 @@ function agency_booking_manager_portal_shortcode() {
 	<section class="agency-manager-portal">
 		<header class="agency-manager-topbar"><div><span><?php esc_html_e( 'Agency Booking', 'agency-module-booking' ); ?></span><h1><?php esc_html_e( 'Business dashboard', 'agency-module-booking' ); ?></h1></div><div><strong><?php echo esc_html( wp_get_current_user()->display_name ); ?></strong><a href="<?php echo esc_url( wp_logout_url( $settings['manager_login_page_id'] ? get_permalink( $settings['manager_login_page_id'] ) : home_url( '/' ) ) ); ?>"><?php esc_html_e( 'Sign out', 'agency-module-booking' ); ?></a></div></header>
 		<nav class="agency-manager-nav"><?php foreach ( array( 'dashboard' => __( 'Overview', 'agency-module-booking' ), 'bookings' => __( 'Bookings', 'agency-module-booking' ), 'calendar' => __( 'Calendar settings', 'agency-module-booking' ) ) as $key => $label ) : ?><a class="<?php echo $tab === $key ? 'is-active' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'portal_tab', $key, $base ) ); ?>"><?php echo esc_html( $label ); ?></a><?php endforeach; ?></nav>
+		<?php if ( function_exists( 'agency_booking_client_portal_debug_panel' ) ) { agency_booking_client_portal_debug_panel(); } ?>
 		<?php if ( isset( $_GET['updated'] ) ) : ?><div class="agency-booking-notice agency-booking-notice--success"><?php esc_html_e( 'Changes saved successfully.', 'agency-module-booking' ); ?></div><?php endif; ?>
 		<?php if ( 'dashboard' === $tab ) : ?>
 			<div class="agency-manager-stats"><?php foreach ( array( 'today' => __( 'Today', 'agency-module-booking' ), 'week' => __( 'Next 7 days', 'agency-module-booking' ), 'month' => __( 'Next 30 days', 'agency-module-booking' ), 'pending' => __( 'Waiting for approval', 'agency-module-booking' ) ) as $key => $label ) : ?><article><span><?php echo esc_html( $label ); ?></span><strong><?php echo absint( $stats[ $key ] ); ?></strong></article><?php endforeach; ?></div>
@@ -156,6 +157,9 @@ function agency_booking_client_portal_bookings() {
 	$stats = agency_booking_admin_stats();
 	$rows  = agency_booking_admin_query();
 	$base  = function_exists( 'agency_core_client_admin_url' ) ? agency_core_client_admin_url( 'bookings' ) : get_permalink();
+	if ( function_exists( 'agency_booking_client_portal_debug_panel' ) ) {
+		agency_booking_client_portal_debug_panel();
+	}
 	?><div class="agency-manager-stats"><?php foreach ( array( 'today' => __( 'Today', 'agency-module-booking' ), 'week' => __( 'Next 7 days', 'agency-module-booking' ), 'month' => __( 'Next 30 days', 'agency-module-booking' ), 'pending' => __( 'Waiting for approval', 'agency-module-booking' ) ) as $key => $label ) : ?><article><span><?php echo esc_html( $label ); ?></span><strong><?php echo absint( $stats[ $key ] ); ?></strong></article><?php endforeach; ?></div><div class="agency-manager-panel"><div class="agency-manager-panel-title"><h2><?php esc_html_e( 'All bookings', 'agency-module-booking' ); ?></h2><span><?php echo absint( count( $rows ) ); ?> <?php esc_html_e( 'records', 'agency-module-booking' ); ?></span></div><?php agency_booking_portal_rows( $rows, $base ); ?></div><?php
 }
 
