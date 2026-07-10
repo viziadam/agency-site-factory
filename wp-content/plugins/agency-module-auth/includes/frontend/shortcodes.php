@@ -8,19 +8,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 function agency_auth_notice() {
-	$status = sanitize_key( wp_unslash( $_GET['agency_auth'] ?? '' ) );
+	$status   = sanitize_key( wp_unslash( $_GET['agency_auth'] ?? '' ) );
 	$messages = array(
-		'registered'         => __( 'Registration completed. Check your inbox to verify your email.', 'agency-module-auth' ),
-		'verified'           => __( 'Your email address is verified. You can sign in.', 'agency-module-auth' ),
-		'reset-sent'         => __( 'If the account exists, a password reset email has been sent.', 'agency-module-auth' ),
-		'verification-sent'  => __( 'If verification is pending, a new email has been sent.', 'agency-module-auth' ),
-		'registration-error' => __( 'Registration could not be completed. Check the fields or use another email address.', 'agency-module-auth' ),
-		'login-error'        => __( 'Sign-in failed. Check your credentials and account verification.', 'agency-module-auth' ),
-		'rate-limited'       => __( 'Too many attempts. Please wait and try again.', 'agency-module-auth' ),
-		'blocked'            => __( 'This customer account is blocked.', 'agency-module-auth' ),
+		'registered'         => __( 'A regisztráció sikeres. Küldtünk egy emailt a megerősítéshez.', 'agency-module-auth' ),
+		'verified'           => __( 'Az email címed megerősítve. Most már be tudsz jelentkezni.', 'agency-module-auth' ),
+		'reset-sent'         => __( 'Ha létezik ilyen fiók, elküldtük a jelszó-visszaállító emailt.', 'agency-module-auth' ),
+		'verification-sent'  => __( 'Ha az email megerősítés még függőben van, újraküldtük a levelet.', 'agency-module-auth' ),
+		'registration-error' => __( 'A regisztráció nem sikerült. Ellenőrizd az adatokat, vagy használj másik email címet.', 'agency-module-auth' ),
+		'login-error'        => __( 'Sikertelen bejelentkezés. Ellenőrizd az email címet, a jelszót és az email-megerősítést.', 'agency-module-auth' ),
+		'rate-limited'       => __( 'Túl sok próbálkozás történt. Várj egy kicsit, majd próbáld újra.', 'agency-module-auth' ),
+		'blocked'            => __( 'Ez a fiók tiltva van.', 'agency-module-auth' ),
 	);
-	$errors = array( 'registration-error', 'login-error', 'rate-limited', 'blocked' );
-	return isset( $messages[ $status ] ) ? '<div class="agency-auth-message agency-auth-message--' . ( in_array( $status, $errors, true ) ? 'error' : 'success' ) . '" role="status">' . esc_html( $messages[ $status ] ) . '</div>' : '';
+	$errors   = array( 'registration-error', 'login-error', 'rate-limited', 'blocked' );
+
+	if ( ! isset( $messages[ $status ] ) ) {
+		return '';
+	}
+
+	return '<div class="agency-auth-message agency-auth-message--' . esc_attr( in_array( $status, $errors, true ) ? 'error' : 'success' ) . '" role="status">' . esc_html( $messages[ $status ] ) . '</div>';
 }
 
 function agency_auth_redirect_status( $status, $fallback = '' ) {
@@ -28,26 +33,76 @@ function agency_auth_redirect_status( $status, $fallback = '' ) {
 	exit;
 }
 
+function agency_auth_page_url( $key, $fallback = '/' ) {
+	$page_id = absint( agency_auth_settings()['page_ids'][ $key ] ?? 0 );
+	$url     = $page_id ? get_permalink( $page_id ) : '';
+
+	return $url ?: home_url( $fallback );
+}
+
 function agency_auth_form( $atts = array() ) {
 	$atts = shortcode_atts( array( 'mode' => 'all' ), (array) $atts, 'agency_auth' );
 	$mode = in_array( $atts['mode'], array( 'all', 'login', 'register', 'reset', 'verification' ), true ) ? $atts['mode'] : 'all';
+
 	if ( 'verification' === $mode ) {
-		return '<div class="agency-auth-shell agency-auth-verification">' . agency_auth_notice() . '<p>' . esc_html__( 'Open the verification link sent to your email address. You can request a new message from the password/reset page.', 'agency-module-auth' ) . '</p></div>';
+		return '<div class="agency-auth-shell agency-auth-verification">' . agency_auth_notice() . '<p>' . esc_html__( 'Nyisd meg az emailben kapott megerősítő linket. Ha nem érkezett meg, kérhetsz új megerősítő emailt.', 'agency-module-auth' ) . '</p></div>';
 	}
+
 	if ( is_user_logged_in() ) {
-		return '<div class="agency-auth-shell agency-auth-notice"><p>' . esc_html__( 'You are signed in.', 'agency-module-auth' ) . ' <a href="' . esc_url( wp_logout_url( home_url( '/' ) ) ) . '">' . esc_html__( 'Sign out', 'agency-module-auth' ) . '</a></p></div>';
+		return '<div class="agency-auth-shell agency-auth-notice"><p>' . esc_html__( 'Már be vagy jelentkezve.', 'agency-module-auth' ) . ' <a href="' . esc_url( wp_logout_url( home_url( '/' ) ) ) . '">' . esc_html__( 'Kijelentkezés', 'agency-module-auth' ) . '</a></p></div>';
 	}
-	$action = esc_url( admin_url( 'admin-post.php' ) );
+
+	$action       = esc_url( admin_url( 'admin-post.php' ) );
+	$password_url = agency_auth_page_url( 'password', '/jelszo-visszaallitas/' );
 	ob_start();
 	?>
 	<div class="agency-auth-shell agency-auth-shell--<?php echo esc_attr( $mode ); ?>">
-	<?php echo wp_kses_post( agency_auth_notice() ); ?>
-	<?php if ( agency_auth_settings()['registration_enabled'] && in_array( $mode, array( 'all', 'register' ), true ) ) : ?><form class="agency-auth-form agency-auth-register-form" method="post" action="<?php echo $action; ?>"><span class="agency-auth-eyebrow"><?php esc_html_e( 'Customer account', 'agency-module-auth' ); ?></span><h2><?php esc_html_e( 'Create account', 'agency-module-auth' ); ?></h2><input type="hidden" name="action" value="agency_auth_register"><?php wp_nonce_field( 'agency_auth_register' ); ?>
-	<p><label><?php esc_html_e( 'Name', 'agency-module-auth' ); ?><input required name="display_name" autocomplete="name"></label></p><p><label><?php esc_html_e( 'Email', 'agency-module-auth' ); ?><input required type="email" name="email" autocomplete="email"></label></p><p><label><?php esc_html_e( 'Password', 'agency-module-auth' ); ?><input required minlength="10" type="password" name="password" autocomplete="new-password"></label></p>
-	<p><label><input required type="checkbox" name="privacy" value="1"> <?php echo esc_html( function_exists( 'agency_legal_get_checkbox_text' ) ? agency_legal_get_checkbox_text( 'registration' ) : __( 'I accept the privacy policy.', 'agency-module-auth' ) ); ?></label></p><button type="submit"><?php esc_html_e( 'Register', 'agency-module-auth' ); ?></button></form><?php endif; ?>
-	<?php if ( in_array( $mode, array( 'all', 'login' ), true ) ) : ?><form class="agency-auth-form agency-auth-login-form" method="post" action="<?php echo $action; ?>"><span class="agency-auth-eyebrow"><?php esc_html_e( 'Welcome back', 'agency-module-auth' ); ?></span><h2><?php esc_html_e( 'Sign in', 'agency-module-auth' ); ?></h2><input type="hidden" name="action" value="agency_auth_login"><?php wp_nonce_field( 'agency_auth_login' ); ?><p><label><?php esc_html_e( 'Email', 'agency-module-auth' ); ?><input required type="email" name="email" autocomplete="email"></label></p><p><label><?php esc_html_e( 'Password', 'agency-module-auth' ); ?><input required type="password" name="password" autocomplete="current-password"></label></p><button type="submit"><?php esc_html_e( 'Sign in', 'agency-module-auth' ); ?></button></form><?php endif; ?>
-	<?php if ( in_array( $mode, array( 'all', 'reset' ), true ) ) : ?><form class="agency-auth-form agency-auth-reset-form" method="post" action="<?php echo $action; ?>"><h2><?php esc_html_e( 'Reset password', 'agency-module-auth' ); ?></h2><input type="hidden" name="action" value="agency_auth_reset"><?php wp_nonce_field( 'agency_auth_reset' ); ?><p><label><?php esc_html_e( 'Email', 'agency-module-auth' ); ?><input required type="email" name="email"></label></p><button type="submit"><?php esc_html_e( 'Send reset link', 'agency-module-auth' ); ?></button></form>
-	<form class="agency-auth-form agency-auth-resend-form" method="post" action="<?php echo $action; ?>"><input type="hidden" name="action" value="agency_auth_resend"><?php wp_nonce_field( 'agency_auth_resend' ); ?><p><label><?php esc_html_e( 'Resend verification email', 'agency-module-auth' ); ?><input required type="email" name="email"></label></p><button type="submit"><?php esc_html_e( 'Resend', 'agency-module-auth' ); ?></button></form><?php endif; ?>
+		<?php echo wp_kses_post( agency_auth_notice() ); ?>
+
+		<?php if ( agency_auth_settings()['registration_enabled'] && in_array( $mode, array( 'all', 'register' ), true ) ) : ?>
+			<form class="agency-auth-form agency-auth-register-form" method="post" action="<?php echo $action; ?>">
+				<span class="agency-auth-eyebrow"><?php esc_html_e( 'Ügyfélfiók', 'agency-module-auth' ); ?></span>
+				<h2><?php esc_html_e( 'Fiók létrehozása', 'agency-module-auth' ); ?></h2>
+				<input type="hidden" name="action" value="agency_auth_register">
+				<?php wp_nonce_field( 'agency_auth_register' ); ?>
+				<p><label><?php esc_html_e( 'Név', 'agency-module-auth' ); ?><input required name="display_name" autocomplete="name"></label></p>
+				<p><label><?php esc_html_e( 'Email', 'agency-module-auth' ); ?><input required type="email" name="email" autocomplete="email"></label></p>
+				<p><label><?php esc_html_e( 'Jelszó', 'agency-module-auth' ); ?><input required minlength="10" type="password" name="password" autocomplete="new-password"></label></p>
+				<p><label><input required type="checkbox" name="privacy" value="1"> <?php echo esc_html( function_exists( 'agency_legal_get_checkbox_text' ) ? agency_legal_get_checkbox_text( 'registration' ) : __( 'Elfogadom az adatkezelési feltételeket.', 'agency-module-auth' ) ); ?></label></p>
+				<button type="submit"><?php esc_html_e( 'Regisztráció', 'agency-module-auth' ); ?></button>
+			</form>
+		<?php endif; ?>
+
+		<?php if ( in_array( $mode, array( 'all', 'login' ), true ) ) : ?>
+			<form class="agency-auth-form agency-auth-login-form" method="post" action="<?php echo $action; ?>">
+				<span class="agency-auth-eyebrow"><?php esc_html_e( 'Üdv újra itt', 'agency-module-auth' ); ?></span>
+				<h2><?php esc_html_e( 'Bejelentkezés', 'agency-module-auth' ); ?></h2>
+				<input type="hidden" name="action" value="agency_auth_login">
+				<?php wp_nonce_field( 'agency_auth_login' ); ?>
+				<p><label><?php esc_html_e( 'Email', 'agency-module-auth' ); ?><input required type="email" name="email" autocomplete="email"></label></p>
+				<p><label><?php esc_html_e( 'Jelszó', 'agency-module-auth' ); ?><input required type="password" name="password" autocomplete="current-password"></label></p>
+				<button type="submit"><?php esc_html_e( 'Bejelentkezés', 'agency-module-auth' ); ?></button>
+				<a class="agency-auth-forgot-link" href="<?php echo esc_url( $password_url ); ?>"><?php esc_html_e( 'Elfelejtetted a jelszavad?', 'agency-module-auth' ); ?></a>
+			</form>
+		<?php endif; ?>
+
+		<?php if ( in_array( $mode, array( 'all', 'reset' ), true ) ) : ?>
+			<form class="agency-auth-form agency-auth-reset-form" method="post" action="<?php echo $action; ?>">
+				<h2><?php esc_html_e( 'Jelszó visszaállítása', 'agency-module-auth' ); ?></h2>
+				<p><?php esc_html_e( 'Add meg az email címed, és küldünk egy jelszó-visszaállító linket.', 'agency-module-auth' ); ?></p>
+				<input type="hidden" name="action" value="agency_auth_reset">
+				<?php wp_nonce_field( 'agency_auth_reset' ); ?>
+				<p><label><?php esc_html_e( 'Email', 'agency-module-auth' ); ?><input required type="email" name="email" autocomplete="email"></label></p>
+				<button type="submit"><?php esc_html_e( 'Jelszó-visszaállító link küldése', 'agency-module-auth' ); ?></button>
+			</form>
+
+			<form class="agency-auth-form agency-auth-resend-form" method="post" action="<?php echo $action; ?>">
+				<input type="hidden" name="action" value="agency_auth_resend">
+				<?php wp_nonce_field( 'agency_auth_resend' ); ?>
+				<p><label><?php esc_html_e( 'Megerősítő email újraküldése', 'agency-module-auth' ); ?><input required type="email" name="email" autocomplete="email"></label></p>
+				<button type="submit"><?php esc_html_e( 'Újraküldés', 'agency-module-auth' ); ?></button>
+			</form>
+		<?php endif; ?>
 	</div>
 	<?php
 	return ob_get_clean();
@@ -63,13 +118,21 @@ function agency_auth_account() {
 		return agency_auth_form();
 	}
 	$user = wp_get_current_user();
-	return '<section class="agency-auth-account"><header><span>' . esc_html__( 'Customer dashboard', 'agency-module-auth' ) . '</span><h2>' . esc_html__( 'My account', 'agency-module-auth' ) . '</h2><p>' . esc_html( $user->display_name ) . ' · ' . esc_html( $user->user_email ) . '</p><a class="agency-auth-logout" href="' . esc_url( wp_logout_url( home_url( '/' ) ) ) . '">' . esc_html__( 'Sign out', 'agency-module-auth' ) . '</a></header>' . ( shortcode_exists( 'agency_booking_customer_list' ) ? do_shortcode( '[agency_booking_customer_list]' ) : '' ) . '</section>';
+	return '<section class="agency-auth-account"><header><span>' . esc_html__( 'Ügyfélfiók', 'agency-module-auth' ) . '</span><h2>' . esc_html__( 'Fiókom', 'agency-module-auth' ) . '</h2><p>' . esc_html( $user->display_name ) . ' · ' . esc_html( $user->user_email ) . '</p><a class="agency-auth-logout" href="' . esc_url( wp_logout_url( home_url( '/' ) ) ) . '">' . esc_html__( 'Kijelentkezés', 'agency-module-auth' ) . '</a></header>' . ( shortcode_exists( 'agency_booking_customer_list' ) ? do_shortcode( '[agency_booking_customer_list]' ) : '' ) . '</section>';
 }
 add_shortcode( 'agency_account', 'agency_auth_account' );
 add_shortcode( 'agency_auth_account', 'agency_auth_account' );
 
 function agency_auth_admin_guard() {
-	if ( is_admin() && ! wp_doing_ajax() && current_user_can( 'agency_customer' ) && ! current_user_can( 'edit_posts' ) ) {
+	if ( ! is_admin() || wp_doing_ajax() ) {
+		return;
+	}
+
+	if ( current_user_can( 'manage_options' ) || current_user_can( 'manage_agency_portal' ) || current_user_can( 'manage_agency_bookings' ) ) {
+		return;
+	}
+
+	if ( current_user_can( 'agency_customer' ) && ! current_user_can( 'edit_posts' ) ) {
 		wp_safe_redirect( agency_auth_settings()['login_redirect'] );
 		exit;
 	}
@@ -89,11 +152,11 @@ function agency_auth_menu_items( $items, $args ) {
 	$ids = (array) ( $s['page_ids'] ?? array() );
 	if ( is_user_logged_in() ) {
 		if ( ! empty( $ids['account'] ) ) {
-			$items .= '<li class="menu-item agency-auth-menu"><a href="' . esc_url( get_permalink( $ids['account'] ) ) . '">' . esc_html__( 'My account', 'agency-module-auth' ) . '</a></li>';
+			$items .= '<li class="menu-item agency-auth-menu"><a href="' . esc_url( get_permalink( $ids['account'] ) ) . '">' . esc_html__( 'Fiókom', 'agency-module-auth' ) . '</a></li>';
 		}
-		$items .= '<li class="menu-item agency-auth-menu"><a href="' . esc_url( wp_logout_url( home_url( '/' ) ) ) . '">' . esc_html__( 'Sign out', 'agency-module-auth' ) . '</a></li>';
+		$items .= '<li class="menu-item agency-auth-menu"><a href="' . esc_url( wp_logout_url( home_url( '/' ) ) ) . '">' . esc_html__( 'Kijelentkezés', 'agency-module-auth' ) . '</a></li>';
 	} else {
-		foreach ( array( 'login' => __( 'Sign in', 'agency-module-auth' ), 'register' => __( 'Register', 'agency-module-auth' ) ) as $key => $label ) {
+		foreach ( array( 'login' => __( 'Bejelentkezés', 'agency-module-auth' ), 'register' => __( 'Regisztráció', 'agency-module-auth' ) ) as $key => $label ) {
 			if ( ! empty( $ids[ $key ] ) ) {
 				$items .= '<li class="menu-item agency-auth-menu"><a href="' . esc_url( get_permalink( $ids[ $key ] ) ) . '">' . esc_html( $label ) . '</a></li>';
 			}
