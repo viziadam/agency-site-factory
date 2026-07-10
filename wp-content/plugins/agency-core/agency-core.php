@@ -27,6 +27,7 @@ $agency_core_includes = array(
 	'meta.php',
 	'settings.php',
 	'module-services.php',
+	'email-service-compat.php',
 	'project.php',
 	'modules.php',
 	'module-setup.php',
