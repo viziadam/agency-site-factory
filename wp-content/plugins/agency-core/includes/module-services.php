@@ -132,11 +132,28 @@ function agency_core_email_settings() {
 	);
 }
 
-function agency_core_update_email_health( $success, $error = '', $is_test = false ) {
-	$health = wp_parse_args( get_option( 'agency_core_email_health', array() ), array( 'test_status' => 'not-tested', 'last_status' => 'not-sent', 'last_error' => '', 'last_tested_at' => '', 'last_sent_at' => '' ) );
-	$health['last_status']  = $success ? 'success' : 'error';
-	$health['last_error']   = $success ? '' : sanitize_text_field( $error );
-	$health['last_sent_at'] = gmdate( 'c' );
+function agency_core_update_email_health( $success, $error = '', $is_test = false, $meta = array() ) {
+	$health = wp_parse_args(
+		get_option( 'agency_core_email_health', array() ),
+		array(
+			'test_status'     => 'not-tested',
+			'last_status'     => 'not-sent',
+			'last_error'      => '',
+			'last_tested_at'  => '',
+			'last_sent_at'    => '',
+			'last_provider'   => '',
+			'last_recipient'  => '',
+			'last_message_id' => '',
+			'last_http_code'  => '',
+		)
+	);
+	$health['last_status']     = $success ? 'success' : 'error';
+	$health['last_error']      = $success ? '' : sanitize_text_field( $error );
+	$health['last_sent_at']    = gmdate( 'c' );
+	$health['last_provider']   = sanitize_key( $meta['provider'] ?? $health['last_provider'] );
+	$health['last_recipient']  = sanitize_email( $meta['recipient'] ?? $health['last_recipient'] );
+	$health['last_message_id'] = sanitize_text_field( $meta['message_id'] ?? $health['last_message_id'] );
+	$health['last_http_code']  = sanitize_text_field( $meta['http_code'] ?? $health['last_http_code'] );
 	if ( $is_test ) {
 		$health['test_status']    = $success ? 'success' : 'error';
 		$health['last_tested_at'] = gmdate( 'c' );
@@ -146,7 +163,7 @@ function agency_core_update_email_health( $success, $error = '', $is_test = fals
 
 function agency_core_capture_wp_mail_error( $error ) {
 	if ( is_wp_error( $error ) ) {
-		agency_core_update_email_health( false, $error->get_error_message(), false );
+		agency_core_update_email_health( false, $error->get_error_message(), false, array( 'provider' => 'wp_mail' ) );
 		agency_core_audit_log( 'email', 'wp_mail_failed', array( 'error' => $error->get_error_message() ) );
 	}
 }
@@ -155,54 +172,69 @@ add_action( 'wp_mail_failed', 'agency_core_capture_wp_mail_error' );
 function agency_core_email_send( $to, $subject, $message, $headers = array(), $is_test = false ) {
 	$settings = agency_core_email_settings();
 	$to       = sanitize_email( $to );
-	$provider_error = '';
+	$provider = $settings['provider'] ?? 'wp_mail';
+
 	if ( ! $to ) {
-		agency_core_update_email_health( false, 'Invalid email recipient.', $is_test );
+		agency_core_update_email_health( false, 'Invalid email recipient.', $is_test, array( 'provider' => $provider, 'recipient' => $to ) );
 		return new WP_Error( 'agency_email_recipient', __( 'Invalid email recipient.', 'agency-core' ) );
 	}
+
+	$subject  = sanitize_text_field( $subject );
+	$message  = wp_kses_post( $message );
 	$headers[] = 'Content-Type: text/html; charset=UTF-8';
+
 	if ( is_email( $settings['sender_email'] ) ) {
 		$headers[] = 'From: ' . sanitize_text_field( $settings['sender_name'] ) . ' <' . sanitize_email( $settings['sender_email'] ) . '>';
 	}
 	if ( is_email( $settings['reply_to'] ) ) {
 		$headers[] = 'Reply-To: ' . sanitize_email( $settings['reply_to'] );
 	}
-	if ( 'brevo' === $settings['provider'] ) {
+
+	if ( 'brevo' === $provider ) {
 		$key = agency_core_decrypt_secret( (string) $settings['api_key'] );
-		if ( $key ) {
-			$response = wp_remote_post(
-				'https://api.brevo.com/v3/smtp/email',
-				array(
-					'timeout' => 15,
-					'headers' => array( 'api-key' => $key, 'Content-Type' => 'application/json', 'accept' => 'application/json' ),
-					'body'    => wp_json_encode(
-						array(
-							'sender'      => array( 'name' => $settings['sender_name'], 'email' => $settings['sender_email'] ),
-							'to'          => array( array( 'email' => $to ) ),
-							'replyTo'     => is_email( $settings['reply_to'] ) ? array( 'email' => $settings['reply_to'] ) : null,
-							'subject'     => sanitize_text_field( $subject ),
-							'htmlContent' => wp_kses_post( $message ),
-						)
-					),
-				)
-			);
-			if ( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) >= 200 && wp_remote_retrieve_response_code( $response ) < 300 ) {
-				agency_core_update_email_health( true, '', $is_test );
-				agency_core_audit_log( 'email', 'sent', array( 'provider' => 'brevo', 'recipient' => $to ) );
-				return true;
-			}
-			$error = is_wp_error( $response ) ? $response->get_error_message() : 'Brevo HTTP ' . wp_remote_retrieve_response_code( $response );
-			$provider_error = $error;
-			agency_core_update_email_health( false, $error, $is_test );
-			agency_core_audit_log( 'email', 'provider_fallback', array( 'provider' => 'brevo' ) );
+		if ( ! $key ) {
+			agency_core_update_email_health( false, 'Brevo API key is missing or could not be decrypted.', $is_test, array( 'provider' => 'brevo', 'recipient' => $to ) );
+			return new WP_Error( 'agency_email_brevo_key_missing', __( 'Brevo API key is missing or invalid.', 'agency-core' ) );
 		}
+
+		$response = wp_remote_post(
+			'https://api.brevo.com/v3/smtp/email',
+			array(
+				'timeout' => 20,
+				'headers' => array( 'api-key' => $key, 'Content-Type' => 'application/json', 'accept' => 'application/json' ),
+				'body'    => wp_json_encode(
+					array_filter(
+						array(
+							'sender'      => array( 'name' => sanitize_text_field( $settings['sender_name'] ), 'email' => sanitize_email( $settings['sender_email'] ) ),
+							'to'          => array( array( 'email' => $to ) ),
+							'replyTo'     => is_email( $settings['reply_to'] ) ? array( 'email' => sanitize_email( $settings['reply_to'] ) ) : null,
+							'subject'     => $subject,
+							'htmlContent' => $message,
+							'textContent' => wp_strip_all_tags( $message ),
+						)
+					)
+				),
+			)
+		);
+		$http_code = is_wp_error( $response ) ? 0 : absint( wp_remote_retrieve_response_code( $response ) );
+		$body      = is_wp_error( $response ) ? '' : (string) wp_remote_retrieve_body( $response );
+		$decoded   = $body ? json_decode( $body, true ) : array();
+
+		if ( ! is_wp_error( $response ) && $http_code >= 200 && $http_code < 300 ) {
+			$message_id = sanitize_text_field( $decoded['messageId'] ?? '' );
+			agency_core_update_email_health( true, '', $is_test, array( 'provider' => 'brevo', 'recipient' => $to, 'message_id' => $message_id, 'http_code' => $http_code ) );
+			agency_core_audit_log( 'email', 'sent', array( 'provider' => 'brevo', 'recipient' => $to, 'message_id' => $message_id, 'http_code' => $http_code, 'is_test' => $is_test ? 1 : 0 ) );
+			return true;
+		}
+
+		$error = is_wp_error( $response ) ? $response->get_error_message() : 'Brevo HTTP ' . $http_code . ': ' . substr( wp_strip_all_tags( $body ), 0, 300 );
+		agency_core_update_email_health( false, $error, $is_test, array( 'provider' => 'brevo', 'recipient' => $to, 'http_code' => $http_code ) );
+		agency_core_audit_log( 'email', 'brevo_failed', array( 'recipient' => $to, 'http_code' => $http_code, 'error' => $error, 'is_test' => $is_test ? 1 : 0 ) );
+		return new WP_Error( 'agency_email_brevo_failed', $error );
 	}
-	$sent = wp_mail( $to, sanitize_text_field( $subject ), wp_kses_post( $message ), $headers );
-	if ( $is_test && $provider_error ) {
-		agency_core_update_email_health( false, $provider_error, true );
-		return new WP_Error( 'agency_email_provider_test_failed', $provider_error );
-	}
-	agency_core_update_email_health( $sent, $sent ? '' : 'wp_mail delivery failed.', $is_test );
+
+	$sent = wp_mail( $to, $subject, $message, $headers );
+	agency_core_update_email_health( $sent, $sent ? '' : 'wp_mail delivery failed.', $is_test, array( 'provider' => 'wp_mail', 'recipient' => $to ) );
 	return $sent ? true : new WP_Error( 'agency_email_failed', __( 'Email delivery failed.', 'agency-core' ) );
 }
 
@@ -210,8 +242,9 @@ function agency_core_render_email_settings() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'Insufficient permissions.', 'agency-core' ) );
 	}
-	$s = agency_core_email_settings();
+	$s      = agency_core_email_settings();
 	$health = function_exists( 'agency_core_get_email_health' ) ? agency_core_get_email_health() : array();
+	$health = array_merge( (array) get_option( 'agency_core_email_health', array() ), $health );
 	?>
 	<div class="wrap"><h1><?php esc_html_e( 'Agency Email Service', 'agency-core' ); ?></h1>
 	<table class="widefat striped"><tbody>
@@ -221,6 +254,10 @@ function agency_core_render_email_settings() {
 	<tr><th><?php esc_html_e( 'Last test', 'agency-core' ); ?></th><td><?php echo esc_html( ( $health['test_status'] ?? 'not-tested' ) . ' ' . ( $health['last_tested_at'] ?? '' ) ); ?></td></tr>
 	<tr><th><?php esc_html_e( 'Last delivery', 'agency-core' ); ?></th><td><?php echo esc_html( ( $health['last_status'] ?? 'not-sent' ) . ' ' . ( $health['last_sent_at'] ?? '' ) ); ?></td></tr>
 	<tr><th><?php esc_html_e( 'Last error', 'agency-core' ); ?></th><td><?php echo esc_html( $health['last_error'] ?? '' ); ?></td></tr>
+	<tr><th><?php esc_html_e( 'Last provider', 'agency-core' ); ?></th><td><?php echo esc_html( $health['last_provider'] ?? '' ); ?></td></tr>
+	<tr><th><?php esc_html_e( 'Last recipient', 'agency-core' ); ?></th><td><?php echo esc_html( $health['last_recipient'] ?? '' ); ?></td></tr>
+	<tr><th><?php esc_html_e( 'Last Brevo message ID', 'agency-core' ); ?></th><td><?php echo esc_html( $health['last_message_id'] ?? '' ); ?></td></tr>
+	<tr><th><?php esc_html_e( 'Last HTTP code', 'agency-core' ); ?></th><td><?php echo esc_html( $health['last_http_code'] ?? '' ); ?></td></tr>
 	</tbody></table>
 	<?php if ( isset( $_GET['email_status'] ) ) : ?><div class="notice notice-<?php echo 'success' === sanitize_key( $_GET['email_status'] ) ? 'success' : 'error'; ?> is-dismissible"><p><?php esc_html_e( 'Email operation completed. Check delivery and the activity log.', 'agency-core' ); ?></p></div><?php endif; ?>
 	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"><input type="hidden" name="action" value="agency_core_save_email"><?php wp_nonce_field( 'agency_core_email_settings' ); ?>
