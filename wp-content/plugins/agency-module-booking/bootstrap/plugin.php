@@ -10,13 +10,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'AGENCY_BOOKING_VERSION', '1.12.0' );
-define( 'AGENCY_BOOKING_DB_VERSION', '1.1.0' );
+define( 'AGENCY_BOOKING_VERSION', '1.12.1' );
+define( 'AGENCY_BOOKING_DB_VERSION', '1.1.1' );
 define( 'AGENCY_BOOKING_FILE', dirname( __DIR__ ) . '/agency-module-booking.php' );
 define( 'AGENCY_BOOKING_PATH', dirname( __DIR__ ) . '/' );
 
 $agency_booking_files = array(
 	'includes/repositories/bookings.php',
+	'includes/services/diagnostics.php',
 	'includes/frontend/booking-shortcodes.php',
 	'includes/admin/bookings-admin.php',
 	'includes/frontend/client-portal.php',
