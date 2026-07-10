@@ -1,6 +1,6 @@
 <?php
 /**
- * Header authentication action buttons.
+ * Header authentication action buttons and small menu label normalizers.
  *
  * @package Agency_Theme
  */
@@ -56,3 +56,23 @@ function agency_theme_render_auth_actions() {
 
 	echo '</div>';
 }
+
+function agency_theme_localize_common_menu_labels( $items ) {
+	$labels = array(
+		'Book an appointment' => __( 'Időpontfoglalás', 'agency-theme' ),
+		'Book now'            => __( 'Időpontfoglalás', 'agency-theme' ),
+		'Sign in'             => __( 'Bejelentkezés', 'agency-theme' ),
+		'Register'            => __( 'Regisztráció', 'agency-theme' ),
+		'My account'          => __( 'Fiókom', 'agency-theme' ),
+		'Sign out'            => __( 'Kijelentkezés', 'agency-theme' ),
+	);
+
+	foreach ( (array) $items as $item ) {
+		if ( isset( $labels[ $item->title ] ) ) {
+			$item->title = $labels[ $item->title ];
+		}
+	}
+
+	return $items;
+}
+add_filter( 'wp_nav_menu_objects', 'agency_theme_localize_common_menu_labels' );
