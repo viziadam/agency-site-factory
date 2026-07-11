@@ -32,6 +32,7 @@ $agency_core_includes = array(
 	'modules.php',
 	'module-setup.php',
 	'client-admin.php',
+	'client-content.php',
 	'admin-editor.php',
 	'renderer.php',
 	'preview.php',
