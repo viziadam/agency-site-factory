@@ -124,7 +124,16 @@ add_shortcode( 'agency_account', 'agency_auth_account' );
 add_shortcode( 'agency_auth_account', 'agency_auth_account' );
 
 function agency_auth_admin_guard() {
+	global $pagenow;
+
 	if ( ! is_admin() || wp_doing_ajax() ) {
+		return;
+	}
+
+	// admin-post.php is WordPress' public form endpoint. Frontend forms such as
+	// booking, login, registration and password reset post here. Never redirect it,
+	// otherwise the real form handler will not run and no booking can be saved.
+	if ( 'admin-post.php' === $pagenow ) {
 		return;
 	}
 
